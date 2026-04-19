@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router";
-import { HomePage, NotFoundPage } from "./pages";
+import { BrowserRouter, Routes, Route } from 'react-router';
+import { HomePage, NotFoundPage } from './pages';
 
 function App() {
   return (
