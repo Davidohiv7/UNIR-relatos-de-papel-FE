@@ -1,5 +1,3 @@
-Normalmente los README.md van en ingles, lo podemos pasar a español, pero debemos revisarlo
-
 # Relatos de Papel — Frontend
 
 Frontend SPA for the Relatos de Papel web application, built as part of the UNIR Full Stack Web Development master's program.
