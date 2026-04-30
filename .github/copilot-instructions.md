@@ -227,7 +227,7 @@ Future scope:
 - Do not add HTTP calls into pages as a shortcut.
 - If network integration arrives later, create a dedicated `src/services/` or `src/api/` layer and keep pages thin.
 - Keep search/filter logic client-side and title-only until the assignment changes.
-- When generating large book mock sets, use Open Library Search and Covers APIs as the source, batch and cache requests, and materialize the result locally under `src/data` instead of fetching from pages at runtime.
+- When generating large book mock sets, use Open Library Search and Covers APIs as the source, batch and cache requests, and materialize the result locally under `src/mocks/books.mock.ts` instead of fetching from pages at runtime.
 - Respect Open Library usage guidance: prefer search batch requests, identify the app with a `User-Agent`, and avoid bulk-download patterns or hundreds of single-book requests.
 
 ## Future folders to create only when needed

@@ -1,35 +1,31 @@
+import type { Customer } from '../types';
+
 export const mockUsers: Customer[] = [
   {
     id: 1,
-    name: 'Ana',
+    firstName: 'Ana',
     lastName: 'García López',
     email: 'ana@relatos.com',
     password: 'password123',
     avatar: 'AG',
-    address: 'Calle Mayor, 42',
-    city: 'Panamá',
-    phone: '+507 612 345 678',
+    phone: '+34 612 345 678',
   },
   {
     id: 2,
-    name: 'Maria',
+    firstName: 'Maria',
     lastName: 'García Lopez',
     email: 'maria@relatos.com',
     password: 'password123',
     avatar: 'MG',
-    address: 'Cra 12 # 34-56',
-    city: 'Cali',
-    phone: '+57 312 345 6789',
+    phone: '+57 312 345 678',
   },
   {
     id: 3,
-    name: 'Jesús',
+    firstName: 'Jesús',
     lastName: 'Pérez Mendez',
     email: 'jesus@relatos.com',
     password: 'password123',
     avatar: 'JP',
-    address: 'Calle Mayor, 42',
-    city: 'Madrid',
-    phone: '+34 612 345 678',
+    phone: '+507 612 345 678',
   },
 ];
