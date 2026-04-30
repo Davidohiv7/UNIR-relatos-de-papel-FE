@@ -1,0 +1,232 @@
+# Relatos de Papel Cursor Rules
+
+- Start from the nearest concrete file before changing anything.
+- Keep the current Vite + React 19 + TypeScript + MUI architecture stable.
+- Use functional components only.
+- Use explicit TypeScript, typed mock data, and real custom hooks.
+- Avoid `any`, `console.log`, dead code, and unused exports.
+- Do not invent backend calls inside the frontend layer.
+- Do not move route declarations out of `src/App.tsx`.
+- Do not hardcode brand colors outside the theme.
+- Do not create new global CSS unless the style is truly global.
+- Reuse existing components, barrels, and theme tokens before creating new files.
+- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) so the shared context and the user-facing guide stay synchronized.
+
+## Scope map
+
+### Root files
+
+- `package.json`, `package-lock.json`, `vite.config.ts`, `eslint.config.js`, `tsconfig.json`, `tsconfig.app.json`, and `tsconfig.node.json` control build, lint, and TypeScript behavior.
+- `index.html` is the app entry shell.
+- `README.md` documents scripts, CI, and delivery expectations.
+- `models.md` is the canonical domain model reference.
+- `prompts.md` stores reusable prompts and AI context.
+- `.env.example` is reserved for future environment variables only.
+
+Future root documents:
+
+- deployment notes or a Vercel URL file.
+- video-memory support notes or delivery evidence.
+- small feature planning notes.
+- never commit generated builds, lockfile noise, or secrets.
+
+### .github
+
+- `.github/workflows/ci.yml` currently enforces lint and format checks.
+- `.github/copilot-instructions.md` is the always-on workspace guidance.
+
+Future `.github` folders:
+
+- `.github/instructions/` for file-scoped rules.
+- `.github/prompts/` for reusable prompts.
+- `.github/agents/` for specialized workflows.
+- `.github/skills/` for repeatable tool-driven tasks.
+- more workflows only if they support CI, preview deploys, or release automation.
+
+### src/App.tsx
+
+- This is the single source of truth for routes.
+- Keep public routes, protected routes, and fallback routes here.
+- Keep React Router configuration declarative.
+
+### src/root.tsx
+
+- Bootstrap only.
+- Import fonts, global CSS, StrictMode, and mount `App`.
+- Keep business logic out of this file.
+
+### src/root.css
+
+- Global app styles only.
+- Use it for resets, body background, and other truly global app-shell styles.
+- Prefer MUI theme overrides for everything else.
+
+### src/config/mui/
+
+- `palette.ts` holds the brand colors only.
+- `typography.ts` holds the Inter and Caveat stacks.
+- `theme.ts` wires the palette, typography, shape, and component overrides.
+- `index.ts` is the barrel export.
+
+Future scope:
+
+- add component overrides or theme tokens here when they are shared.
+- never duplicate brand values in pages when they already belong in the theme.
+
+### src/layouts/main/
+
+- `Main.layout.tsx` owns the shell and `Outlet`.
+- `Navbar.tsx` owns the sticky header and navigation affordances.
+- `Footer.tsx` owns the footer and brand closure.
+- `index.ts` should expose the layout entry point.
+
+Future scope:
+
+- keep persistent cart UI or shell-level badges here if they are shared across routes.
+- split the shell before adding layout logic to pages.
+
+### src/components/ui/
+
+- `BrandIcon.tsx` is the brand mark.
+- `Button.tsx` is currently a placeholder; if it stays, it must become a real typed wrapper or be replaced by MUI Button usage.
+- `Examples.tsx` is the UI showcase, not production logic.
+- `index.ts` is the barrel export.
+
+Future scope:
+
+- add reusable primitives here: empty states, section titles, price tags, stat cards, icon badges, search fields, and shared wrappers around MUI patterns.
+- if more than one page needs a visual pattern, promote it here.
+
+### src/components/book/
+
+- `BookCard.tsx` is the book presentation component.
+- `index.ts` is the barrel export.
+
+Future scope:
+
+- create `src/components/catalog/` if the catalog gains its own grid, filter, or result components.
+- add book gallery or metadata helpers here before bloating the book page.
+
+### src/context/
+
+- `Auth.context.tsx` is currently a placeholder.
+- `index.ts` is the barrel export.
+
+Future scope:
+
+- add `auth/`, `cart/`, `search/`, or `profile/` subfolders when each context needs its own provider, hook, and types.
+- keep context values typed and stable.
+
+### src/hooks/
+
+- `api/use-api.hook.ts` is currently incomplete.
+- Replace placeholder text with a real hook or retire it once feature hooks exist.
+
+Future scope:
+
+- `useAuth`, `useCart`, `useDebounce`, `useLocalStorage`, `useBookSearch`, `useCheckout`, and route-guard hooks belong here or in feature-specific hook folders.
+- hooks should compose logic, not render UI.
+
+### src/data/
+
+- This folder is currently empty.
+- Use it for typed mock data and in-memory fixtures.
+- When generating large mock catalogs, use Open Library Search and Covers APIs as the upstream source, cache the responses, and persist the generated snapshot locally in `src/mocks/books.mock.ts`.
+- Do not place live API fetches in pages just to populate mock content.
+- Respect Open Library guidance: batch requests, identify the app with a `User-Agent`, and avoid bulk-download behavior or many single-book requests.
+
+Future scope:
+
+- add static datasets for books, customers, orders, categories, filters, and seeded examples.
+- keep generators here or under `src/data/factories/` if test data generation is needed.
+- do not mix data creation with page rendering.
+
+### src/pages/
+
+- Page files must stay thin and compose reusable components.
+- `landing/Landing.page.tsx` is the public entry page.
+- `login/Login.page.tsx` is the login form; success redirects to profile.
+- `catalog/Catalog.page.tsx` is the title-only search and listing page.
+- `book/Book.page.tsx` is the book detail page and the only place where a book can be added to the cart.
+- `checkout/Checkout.page.tsx` is the protected checkout page.
+- `profile/Profile.page.tsx` is the protected profile page with user data and the last five orders.
+- `not-found/NotFound.page.tsx` is the route fallback.
+- `story-book/StoryBook.page.tsx` is the component showcase.
+- `index.ts` is the page barrel export.
+
+Future scope:
+
+- if a dedicated cart route is ever added, create `src/pages/cart/Cart.page.tsx`.
+- if auth or admin screens appear later, create a new page folder only when the route is stable.
+- keep business logic out of pages and move it into hooks, context, or reusable components.
+
+### src/types/
+
+- `book.types.ts`, `customer.types.ts`, and `order.types.ts` define the current domain model.
+- `index.ts` is the shared export surface.
+
+Future scope:
+
+- add `auth.types.ts`, `cart.types.ts`, `filter.types.ts`, `ui.types.ts`, or `api.types.ts` only when those domains exist.
+- keep types close to the feature, then export them through the barrel.
+
+## Page contract
+
+- Landing is public.
+- Login must redirect to profile after success.
+- Catalog filters by book title only for this activity.
+- Only the book detail view may add a book to the cart.
+- Cart must remain visible on catalog and book views.
+- Checkout is protected and on success must call `window.alert`, clear the cart, then navigate to `/`.
+- Profile is protected and must show user data plus the last five orders.
+- NotFound must return the user to the app.
+- StoryBook is for visual verification only.
+
+## Styling contract
+
+- Keep the current brand palette: navy primary, warm sand secondary, white contrast.
+- Keep Inter for body text and Caveat for headings.
+- Prefer MUI components, `sx`, and theme overrides over ad hoc CSS.
+- Keep `src/root.css` for only global resets or truly global app-shell styling.
+- Avoid generic default MUI screens; the app should feel book-themed, warm, and polished.
+- If a reusable visual pattern appears more than once, promote it into `src/components/ui` or a domain component folder.
+
+## Data and integration rules
+
+- Use typed mock data until a backend exists.
+- Do not add HTTP calls into pages as a shortcut.
+- If network integration arrives later, create a dedicated `src/services/` or `src/api/` layer and keep pages thin.
+- Keep search/filter logic client-side and title-only until the assignment changes.
+
+## Future folders to create only when needed
+
+- `src/components/catalog/`
+- `src/components/cart/`
+- `src/components/forms/`
+- `src/components/profile/`
+- `src/components/landing/`
+- `src/components/auth/`
+- `src/context/cart/`
+- `src/context/search/`
+- `src/hooks/useAuth.ts`
+- `src/hooks/useCart.ts`
+- `src/hooks/useDebounce.ts`
+- `src/hooks/useLocalStorage.ts`
+- `src/data/books.ts`
+- `src/data/customers.ts`
+- `src/data/orders.ts`
+- `src/services/`
+- `src/utils/`
+- `src/constants/`
+- `src/assets/`
+- `src/test/` or `src/__tests__/`
+- `.github/instructions/`, `.github/prompts/`, `.github/agents/`, `.github/skills/`
+
+## Quality and validation
+
+- Respect ESLint and Prettier; CI fails when lint or format fails.
+- Avoid `any`, `console.log`, dead code, and unused exports.
+- Keep components focused and easy to read.
+- Update barrels when new modules are added.
+- Validate the touched slice with the narrowest useful check before widening scope.
+- If a change touches a shared contract, update every consumer of that contract.
