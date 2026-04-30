@@ -64,4 +64,3 @@ export const mockUsers: User[] = [
     phone: '+34 612 345 678',
   },
 ];
-
