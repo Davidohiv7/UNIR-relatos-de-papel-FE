@@ -1,4 +1,4 @@
-export type { Book, BookCategory } from './book.types';
-export { BookFormat } from './book.types';
+export type { Book, BookFormat } from './book.types';
 export type { Customer } from './customer.types';
-export type { BookOrder, Order } from './order.types';
+export type { Order, OrderItem, OrderStatus } from './order.types';
+export type { Address } from './order.types';

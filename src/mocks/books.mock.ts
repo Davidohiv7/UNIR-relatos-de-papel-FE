@@ -1,31 +1,4 @@
-export interface Book {
-  id: number;
-  title: string;
-  author: string;
-  description: string;
-  images: string[];
-  rating: number;
-  price: number;
-  language: string;
-  type: 'fisico' | 'digital';
-  year: number;
-  genre: string;
-  originalPrice?: number;
-  stock: number;
-  pages: number;
-  isbn: string;
-  reviews: number;
-  badge?:
-    | 'Bestseller'
-    | 'Nuevo'
-    | 'Recomendado'
-    | 'Oferta'
-    | 'Clásico'
-    | 'Premio Nobel'
-    | 'Autor Destacado'
-    | 'Edición Limitada';
-  featured?: boolean;
-}
+import type { Book } from '../types/book.types';
 
 export const books: Book[] = [
   {

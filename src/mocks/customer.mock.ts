@@ -1,35 +1,4 @@
-export interface User {
-  id: number;
-  name: string;
-  lastName: string;
-  email: string;
-  password: string;
-  avatar: string;
-  address: string;
-  city: string;
-  phone: string;
-}
-
-export interface OrderItem {
-  bookId: number;
-  title: string;
-  author: string;
-  price: number;
-  quantity: number;
-}
-
-export interface Order {
-  id: string;
-  date: string;
-  dateReceived?: string;
-  UserId: number;
-  status: 'Entregado' | 'En tránsito' | 'Procesando' | 'Cancelado';
-  items: OrderItem[];
-  total: number;
-  address: string;
-}
-
-export const mockUsers: User[] = [
+export const mockUsers: Customer[] = [
   {
     id: 1,
     name: 'Ana',
