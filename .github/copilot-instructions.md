@@ -16,7 +16,7 @@ This repository is the React SPA for the UNIR Relatos de Papel front-end activit
 - Replace placeholders with real implementations instead of adding more placeholder text.
 - Do not write backend code into the frontend layer.
 - Create a new folder only when it has a stable responsibility.
-- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), and [prompts.md](prompts.md) so the shared context stays synchronized.
+- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) so the shared context and the user-facing guide stay synchronized.
 
 ## Repository map
 
