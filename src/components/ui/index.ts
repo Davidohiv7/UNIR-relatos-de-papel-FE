@@ -1,3 +1,5 @@
+import BrandIcon from './BrandIcon';
 import Button from './Button';
+import Examples from './Examples';
 
-export { Button };
+export { BrandIcon, Button, Examples };
