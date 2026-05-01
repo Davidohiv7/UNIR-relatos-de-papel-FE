@@ -1,7 +1,4 @@
-#!/bin/sh
-# Hook de Husky que se ejecuta antes de cada commit.
-# Carga la configuración necesaria de Husky y luego ejecuta lint-staged
-# para validar y formatear los archivos en staging.
-. "$(dirname "$0")/_/husky.sh"
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged 
+npx lint-staged
