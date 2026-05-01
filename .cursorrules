@@ -10,7 +10,7 @@
 - Do not hardcode brand colors outside the theme.
 - Do not create new global CSS unless the style is truly global.
 - Reuse existing components, barrels, and theme tokens before creating new files.
-- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), and [prompts.md](prompts.md) so the shared context stays synchronized.
+- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) so the shared context and the user-facing guide stay synchronized.
 
 ## Scope map
 
@@ -131,7 +131,7 @@ Future scope:
 
 - This folder is currently empty.
 - Use it for typed mock data and in-memory fixtures.
-- When generating large mock catalogs, use Open Library Search and Covers APIs as the upstream source, cache the responses, and persist the generated snapshot locally in `src/data`.
+- When generating large mock catalogs, use Open Library Search and Covers APIs as the upstream source, cache the responses, and persist the generated snapshot locally in `src/mocks/books.mock.ts`.
 - Do not place live API fetches in pages just to populate mock content.
 - Respect Open Library guidance: batch requests, identify the app with a `User-Agent`, and avoid bulk-download behavior or many single-book requests.
 

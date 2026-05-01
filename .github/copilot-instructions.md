@@ -16,7 +16,10 @@ This repository is the React SPA for the UNIR Relatos de Papel front-end activit
 - Replace placeholders with real implementations instead of adding more placeholder text.
 - Do not write backend code into the frontend layer.
 - Create a new folder only when it has a stable responsibility.
-- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), and [prompts.md](prompts.md) so the shared context stays synchronized.
+  <<<<<<< HEAD
+- # At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), and [prompts.md](prompts.md) so the shared context stays synchronized.
+- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) so the shared context and the user-facing guide stay synchronized.
+  > > > > > > > 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
 
 ## Repository map
 
@@ -227,7 +230,7 @@ Future scope:
 - Do not add HTTP calls into pages as a shortcut.
 - If network integration arrives later, create a dedicated `src/services/` or `src/api/` layer and keep pages thin.
 - Keep search/filter logic client-side and title-only until the assignment changes.
-- When generating large book mock sets, use Open Library Search and Covers APIs as the source, batch and cache requests, and materialize the result locally under `src/data` instead of fetching from pages at runtime.
+- When generating large book mock sets, use Open Library Search and Covers APIs as the source, batch and cache requests, and materialize the result locally under `src/mocks/books.mock.ts` instead of fetching from pages at runtime.
 - Respect Open Library usage guidance: prefer search batch requests, identify the app with a `User-Agent`, and avoid bulk-download patterns or hundreds of single-book requests.
 
 ## Future folders to create only when needed

@@ -3,18 +3,17 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const outputFile = resolve(rootDir, 'src/data/books.ts');
+const outputFile = resolve(rootDir, 'src/mocks/books.mock.ts');
 const userAgent = 'Relatos de Papel Frontend (copilot@unir.local)';
 const targetCount = 1000;
 const pageSize = 100;
 const maxPages = 3;
 
+<<<<<<< HEAD
 const genres = [
   'Todos',
-  'Novela negra, thriller o suspense',
-  'Novela histórica',
+=======
   'Romántica',
-  'Ciencia ficción',
   'Distopía',
   'Aventuras',
   'Fantasía',
@@ -58,7 +57,11 @@ const querySpecs = [
   'travel',
 ];
 
+<<<<<<< HEAD
 const badgeOptions = [
+=======
+const tagOptions = [
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
   'Bestseller',
   'Nuevo',
   'Recomendado',
@@ -69,6 +72,11 @@ const badgeOptions = [
   'Edición Limitada',
 ];
 
+<<<<<<< HEAD
+=======
+const tagIds = new Map(tagOptions.map((name, index) => [name, index + 1]));
+
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function hashString(value) {
@@ -130,6 +138,7 @@ function normalizeIsbn(isbnList, seed) {
   return String(9780000000000 + (seed % 1000000000));
 }
 
+<<<<<<< HEAD
 function buildCoverUrls(doc, isbn, olid) {
   const coverId = typeof doc.cover_i === 'number' ? doc.cover_i : undefined;
 
@@ -154,6 +163,20 @@ function buildCoverUrls(doc, isbn, olid) {
 }
 
 function pickBadge(seed, rating, year) {
+=======
+function buildPictures(doc, isbn, olid, seed) {
+  const coverId = typeof doc.cover_i === 'number' ? doc.cover_i : undefined;
+  const source = coverId ? `b/id/${coverId}` : isbn ? `b/isbn/${isbn}` : `b/olid/${olid}`;
+  const baseId = coverId ?? seed % 1000000;
+
+  return ['M', 'L'].map((size, offset) => ({
+    id: baseId + offset,
+    url: `https://covers.openlibrary.org/${source}-${size}.jpg`,
+  }));
+}
+
+function pickTagName(seed, rating, year) {
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
   if (rating >= 4.8) {
     return 'Bestseller';
   }
@@ -189,10 +212,17 @@ function pickBadge(seed, rating, year) {
   return undefined;
 }
 
+<<<<<<< HEAD
 function buildDescription(title, author, genre, year, editionCount) {
   return compactText(
     `${title} es una obra recuperada desde Open Library para la colección de Relatos de Papel. ` +
       `Firmada por ${author}, se integra en la categoría ${genre.toLowerCase()} y ofrece una lectura ` +
+=======
+function buildDescription(title, author, categoryName, year, editionCount) {
+  return compactText(
+    `${title} es una obra recuperada desde Open Library para la colección de Relatos de Papel. ` +
+      `Firmada por ${author}, se integra en la categoría ${categoryName.toLowerCase()} y ofrece una lectura ` +
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
       `pensada para explorar el catálogo con variedad, contexto y una ficha rica. ` +
       `La edición consultada fue publicada por primera vez en ${year} y cuenta con ${editionCount} referencias relacionadas en la plataforma.`
   );
@@ -208,12 +238,18 @@ function buildBook(doc, index) {
   const olid =
     typeof doc.key === 'string' ? doc.key.replace(/^\/?(works|books)\//, '') : `OL${index + 1}W`;
   const seed = hashString(`${olid}|${title}|${author}|${index}`);
+<<<<<<< HEAD
   const genre = genres[(index % (genres.length - 1)) + 1];
+=======
+  const categoryName = categoryLabels[index % categoryLabels.length];
+  const categoryId = (index % categoryLabels.length) + 1;
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
   const year = Number.isFinite(doc.first_publish_year)
     ? doc.first_publish_year
     : 1950 + (seed % 75);
   const rating = Number((3.5 + (seed % 16) / 10).toFixed(1));
   const price = Number((8 + (seed % 320) / 10).toFixed(2));
+<<<<<<< HEAD
   const originalPrice = seed % 4 === 0 ? Number((price + 4.5).toFixed(2)) : undefined;
   const stock = 3 + (seed % 24);
   const pages = 120 + (seed % 680);
@@ -222,11 +258,24 @@ function buildBook(doc, index) {
   const type = seed % 4 === 0 ? 'digital' : 'fisico';
   const isbn = normalizeIsbn(doc.isbn, seed);
   const images = buildCoverUrls(doc, isbn, olid);
+=======
+  const stock = 3 + (seed % 24);
+  const pages = 120 + (seed % 680);
+  const reviewsCount =
+    24 + (Number.isFinite(doc.edition_count) ? doc.edition_count * 5 : seed % 6000);
+  const tagName = pickTagName(seed, rating, year);
+  const tagId = tagName ? (tagIds.get(tagName) ?? 0) : undefined;
+  const format = seed % 4 === 0 ? 'digital' : 'fisico';
+  const isbn = normalizeIsbn(doc.isbn, seed);
+  const pictures = buildPictures(doc, isbn, olid, seed);
+  const featured = index < 40 || rating >= 4.7 || seed % 9 === 0;
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
 
   return {
     id: index + 1,
     title,
     author,
+<<<<<<< HEAD
     description: buildDescription(title, author, genre, year, reviews),
     images,
     rating,
@@ -242,6 +291,22 @@ function buildBook(doc, index) {
     reviews,
     badge,
     featured: index < 40 || rating >= 4.7 || seed % 9 === 0,
+=======
+    description: buildDescription(title, author, categoryName, year, reviewsCount),
+    pictures,
+    rating,
+    price,
+    language: normalizeLanguage(doc.language),
+    format,
+    year,
+    categories: [{ id: categoryId, name: categoryName }],
+    stock,
+    pages,
+    isbn,
+    reviewsCount,
+    ...(tagName ? { tag: { id: tagId, name: tagName } } : {}),
+    ...(featured ? { featured: true } : {}),
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
   };
 }
 
@@ -325,13 +390,21 @@ async function generateBooks() {
   return books.slice(0, targetCount);
 }
 
+<<<<<<< HEAD
 function toTypeScriptArray(values) {
   return JSON.stringify(values, null, 2);
+=======
+function serializeBooks(books) {
+  return JSON.stringify(books, null, 2)
+    .replace(/"format": "fisico"/g, 'format: BookFormat.PHYSICAL')
+    .replace(/"format": "digital"/g, 'format: BookFormat.DIGITAL');
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
 }
 
 async function main() {
   const books = await generateBooks();
 
+<<<<<<< HEAD
   const content = `export interface Book {
   id: number;
   title: string;
@@ -364,6 +437,11 @@ async function main() {
 export const books: Book[] = ${toTypeScriptArray(books)};
 
 export const genres = ${toTypeScriptArray(genres)};
+=======
+  const content = `import { BookFormat, type Book } from '../types';
+
+export const books: Book[] = ${serializeBooks(books)};
+>>>>>>> 2f9133d3f8db2ebea3bf64b47e10133f88d5f5e2
 `;
 
   await writeFile(outputFile, content, 'utf8');

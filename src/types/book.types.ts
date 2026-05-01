@@ -1,30 +1,28 @@
-export type BookFormat = 'fisico' | 'digital';
+import type { Category } from './category.types';
+import type { Picture } from './picture.types';
+import type { Tag } from './tag.types';
+
+export enum BookFormat {
+  PHYSICAL = 'fisico',
+  DIGITAL = 'digital',
+}
 
 export type Book = {
   id: number;
   title: string;
   author: string;
   description: string;
-  images: string[];
   language: string;
-  type: BookFormat;
+  format: BookFormat;
+  pictures: Picture[];
   year: number;
-  genres: string[];
+  categories: Category[];
   price: number;
   stock: number;
   rating: number;
-  originalPrice?: number;
+  reviewsCount: number;
   pages: number;
   isbn: string;
-  reviews: number;
-  badge?:
-    | 'Bestseller'
-    | 'Nuevo'
-    | 'Recomendado'
-    | 'Oferta'
-    | 'Clásico'
-    | 'Premio Nobel'
-    | 'Autor Destacado'
-    | 'Edición Limitada';
+  tag?: Tag;
   featured?: boolean;
 };
