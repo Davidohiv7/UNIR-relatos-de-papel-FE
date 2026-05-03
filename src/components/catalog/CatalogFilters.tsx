@@ -175,10 +175,10 @@ function CatalogFilters({
             />
             <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
               <Typography variant="caption" color="text.secondary">
-                {priceLimits.min.toFixed(2)} €
+                {priceLimits.min.toFixed(2)} $
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {priceLimits.max.toFixed(2)} €
+                {priceLimits.max.toFixed(2)} $
               </Typography>
             </Stack>
           </Box>
