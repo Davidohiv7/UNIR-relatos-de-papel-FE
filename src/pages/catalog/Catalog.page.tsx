@@ -46,8 +46,6 @@ function CatalogPage() {
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
 
-  const gridRef = useRef<HTMLDivElement>(null);
-
   // All filter/sort/page state lives in the URL
   const { params, setParams, clearParams } = useCatalogSearchParams(metadata);
 
@@ -157,7 +155,7 @@ function CatalogPage() {
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setParams({ page: value });
-    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -194,27 +192,29 @@ function CatalogPage() {
                 gridTemplateColumns: { xs: '1fr', md: '280px 1fr', lg: '300px 1fr' },
               }}
             >
-              <CatalogFilters
-                values={{
-                  search: searchInput,
-                  categoryId: params.categoryId,
-                  format: params.format,
-                  language: params.language,
-                  priceRange: params.priceRange,
-                }}
-                categories={metadata.categories}
-                languages={metadata.languages}
-                priceLimits={metadata.priceRange}
-                activeFiltersCount={activeFiltersCount}
-                onSearchChange={val => setSearchInput(val)}
-                onCategoryChange={val => setParams({ categoryId: val })}
-                onFormatChange={val => setParams({ format: val })}
-                onLanguageChange={val => setParams({ language: val })}
-                onPriceRangeChange={val => setParams({ priceRange: val })}
-                onClearFilters={handleClearFilters}
-              />
+              <Box sx={{ alignSelf: 'start' }}>
+                <CatalogFilters
+                  values={{
+                    search: searchInput,
+                    categoryId: params.categoryId,
+                    format: params.format,
+                    language: params.language,
+                    priceRange: params.priceRange,
+                  }}
+                  categories={metadata.categories}
+                  languages={metadata.languages}
+                  priceLimits={metadata.priceRange}
+                  activeFiltersCount={activeFiltersCount}
+                  onSearchChange={val => setSearchInput(val)}
+                  onCategoryChange={val => setParams({ categoryId: val })}
+                  onFormatChange={val => setParams({ format: val })}
+                  onLanguageChange={val => setParams({ language: val })}
+                  onPriceRangeChange={val => setParams({ priceRange: val })}
+                  onClearFilters={handleClearFilters}
+                />
+              </Box>
 
-              <Stack spacing={2.5} ref={gridRef}>
+              <Stack spacing={2.5}>
                 <CatalogToolbar
                   totalResults={loading ? 0 : filteredBooks.length}
                   sortBy={params.sortBy}

@@ -27,10 +27,14 @@ Relatos de Papel es la SPA en React del proyecto transversal del máster UNIR. E
 
 - El shell visual (navbar, footer) está montado y funcional con búsqueda inline, acciones de autenticación y badge de carrito.
 - El catálogo (`/catalog`) está completamente implementado: filtros por título/autor, categoría, formato, idioma y rango de precio; ordenación; paginación local; skeleton loaders; estado de búsqueda en la URL.
+- La búsqueda del catálogo sincroniza el query con debounce y una guardia de montaje para evitar saltos.
+- El panel de filtros del catálogo mantiene altura ajustada al contenido y no se estira con la grilla de libros.
+- La paginación del catálogo hace scroll al inicio de la página para mantener el contexto.
 - La ficha de libro (`/book/:id`) está completamente implementada: portada con fallback de color, metadatos, control de cantidad, botón de añadir al carrito, stock, libros relacionados y links rápidos a filtros.
 - El carrito funciona: drawer lateral, lista de ítems, `QuantityInput`, eliminar ítem, total y botón de checkout; persiste en `localStorage` y se sincroniza entre pestañas.
 - El checkout (`/checkout`) está implementado: selección de dirección de envío, resumen de la orden, flujo de pago con `window.alert` + clear cart + redirect.
 - El perfil (`/profile`) está implementado: cabecera con avatar, edición de datos personales, gestión de direcciones y listado de últimos pedidos.
+- Los enlaces del footer en la sección de catálogo hacen scroll al inicio para mejorar la navegación.
 - La autenticación usa `AuthContext`; `ProtectedRoute` guarda `/checkout` y `/profile`; login redirige mediante el parámetro `?redirect=`.
 - Las alertas/notificaciones usan `AlertContext` con un hook `useAlert`.
 - `BookCardSkeleton` carga en el catálogo mientras se obtienen los datos.
@@ -182,7 +186,7 @@ VITE_API_URL=http://localhost:3000/api
 2. Si el dato vive en mock, actualiza también `src/mocks/*`.
 3. Si el backend entra en juego, ajusta `src/services/*` y deja las páginas finas.
 4. Si el patrón visual se repite, súbelo a `src/components/ui/` o al folder de dominio correspondiente.
-5. Si cambia la arquitectura, las rutas o el contrato funcional, actualiza también `README.md`, `.github/copilot-instructions.md`, `.cursorrules` y `prompts.md` en la misma iteración.
+5. Si el cambio introduce algo significativo — nuevo componente, ruta, hook, servicio, cambio de contrato de datos o decisión arquitectónica — actualiza también `README.md`, `.github/copilot-instructions.md`, `.cursorrules` y `prompts.md` en la misma iteración. No los actualices para arreglos triviales (typos, retoques de estilo, parches de una línea) que no aportan contexto nuevo.
 
 ## Regla De Trabajo
 

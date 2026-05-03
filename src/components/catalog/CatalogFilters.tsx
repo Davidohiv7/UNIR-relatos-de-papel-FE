@@ -82,7 +82,10 @@ function CatalogFilters({
   };
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 3, position: 'sticky', top: 80 }}>
+    <Card
+      variant="outlined"
+      sx={{ borderRadius: 3, position: 'sticky', top: 80, height: 'fit-content' }}
+    >
       <CardContent>
         <Stack spacing={2.5}>
           <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>

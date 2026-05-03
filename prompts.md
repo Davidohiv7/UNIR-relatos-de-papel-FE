@@ -125,4 +125,4 @@ Actualizame los mocks de books, les sobra y falta informacion
 
 ## Regla de mantenimiento con IA
 
-Cada iteracion asistida por IA que modifique el repositorio debe terminar actualizando [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md) y [prompts.md](prompts.md) para mantener sincronizados el contexto interno y la guia de uso del proyecto.
+Cada iteracion asistida por IA debe actualizar [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md) y [prompts.md](prompts.md) **solo si el cambio aporta algo significativo**: nuevo componente, ruta, hook, servicio, cambio en el contrato de datos o decision arquitectonica. No actualizar estos archivos para arreglos triviales (typos, retoques de estilo, parches de una linea) que no agregan contexto nuevo.

@@ -7,6 +7,7 @@ import { BookFormat } from '../../types';
 type FooterLink = {
   label: string;
   to: string;
+  onClick?: () => void;
 };
 
 type ColumnProps = {
@@ -23,8 +24,8 @@ function FooterColumn({ title, links }: ColumnProps) {
       >
         {title}
       </Typography>
-      {links.map(({ label, to }) => (
-        <Link key={label} to={to} style={{ textDecoration: 'none' }}>
+      {links.map(({ label, to, onClick }) => (
+        <Link key={label} to={to} style={{ textDecoration: 'none' }} onClick={onClick}>
           <Typography
             variant="body2"
             sx={{
@@ -42,12 +43,32 @@ function FooterColumn({ title, links }: ColumnProps) {
   );
 }
 
+const handleCatalogLinkClick = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 const catalogLinks: FooterLink[] = [
-  { label: 'Todos los libros', to: ROUTES.catalog },
-  { label: 'Libros físicos', to: buildCatalogUrl({ format: BookFormat.PHYSICAL }) },
-  { label: 'Libros digitales', to: buildCatalogUrl({ format: BookFormat.DIGITAL }) },
-  { label: 'Mejor valorados', to: buildCatalogUrl({ sortBy: 'rating', sortOrder: 'desc' }) },
-  { label: 'Novedades', to: buildCatalogUrl({ sortBy: 'year', sortOrder: 'desc' }) },
+  { label: 'Todos los libros', to: ROUTES.catalog, onClick: handleCatalogLinkClick },
+  {
+    label: 'Libros físicos',
+    to: buildCatalogUrl({ format: BookFormat.PHYSICAL }),
+    onClick: handleCatalogLinkClick,
+  },
+  {
+    label: 'Libros digitales',
+    to: buildCatalogUrl({ format: BookFormat.DIGITAL }),
+    onClick: handleCatalogLinkClick,
+  },
+  {
+    label: 'Mejor valorados',
+    to: buildCatalogUrl({ sortBy: 'rating', sortOrder: 'desc' }),
+    onClick: handleCatalogLinkClick,
+  },
+  {
+    label: 'Novedades',
+    to: buildCatalogUrl({ sortBy: 'year', sortOrder: 'desc' }),
+    onClick: handleCatalogLinkClick,
+  },
 ];
 
 const accountLinks: FooterLink[] = [
