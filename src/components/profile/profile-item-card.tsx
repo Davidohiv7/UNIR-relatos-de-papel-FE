@@ -1,5 +1,5 @@
 import { alpha, Box, ButtonBase, Typography, useTheme, type SxProps } from '@mui/material';
-import { type ProfileItem } from '../../../types/profile.types';
+import { ProfileItem } from '../../types/profile.types';
 
 type ProfileItemProps = {
   item: ProfileItem;

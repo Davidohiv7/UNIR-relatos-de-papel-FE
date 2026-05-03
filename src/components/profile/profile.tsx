@@ -8,7 +8,7 @@ import { renderProfileSection } from '../../utils/profile.utils';
 type ProfileProps = {
   activeSection: ProfileSection;
   onChangeSection: (section: ProfileSection) => void;
-  onLogout?: () => void;
+  onLogout: () => void;
   customer: SafeCustomer;
 };
 

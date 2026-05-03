@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { Logout } from '@mui/icons-material';
-import { useAuth } from '../../../hooks';
-import { ROUTES } from '../../../config/navigation/navigation.config';
+import { useAuth } from '../../hooks';
+import { ROUTES } from '../../config/navigation/navigation.config';
 
 function LogoutButton() {
   const { logout } = useAuth();

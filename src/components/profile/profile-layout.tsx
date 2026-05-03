@@ -7,8 +7,8 @@ import ProfileItemCard from './profile-item-card';
 
 interface ProfileProps {
   activeSection: string;
-  onChangeSection: (section: string) => void;
-  onLogout?: () => void;
+  onChangeSection: (section: ProfileSection) => void;
+  onLogout: () => void;
 }
 
 export default function ProfileLayout({ activeSection, onChangeSection, onLogout }: ProfileProps) {

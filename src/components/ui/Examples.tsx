@@ -65,7 +65,7 @@ function Examples() {
       </Section>
 
       <Section title="Buttons">
-        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }} useFlexGap>
           <Button variant="contained">Primary</Button>
           <Button variant="contained" color="secondary">
             Secondary
@@ -82,7 +82,7 @@ function Examples() {
       </Section>
 
       <Section title="Icon Buttons & Tooltip">
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Tooltip title="Buscar">
             <IconButton>
               <SearchIcon />
@@ -102,7 +102,7 @@ function Examples() {
       </Section>
 
       <Section title="Chips">
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
           <Chip label="Fantasía" />
           <Chip label="Thriller" color="primary" />
           <Chip label="Autoayuda" color="secondary" />
@@ -112,7 +112,7 @@ function Examples() {
       </Section>
 
       <Section title="TextField">
-        <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }} useFlexGap>
           <TextField label="Buscar libro" variant="outlined" />
           <TextField label="Email" type="email" variant="filled" />
           <TextField label="Estándar" variant="standard" />
@@ -152,7 +152,7 @@ function Examples() {
       </Section>
 
       <Section title="Avatar & Badge">
-        <Stack direction="row" spacing={3} alignItems="center">
+        <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
           <Avatar>
             <PersonIcon />
           </Avatar>
@@ -167,7 +167,7 @@ function Examples() {
       </Section>
 
       <Section title="Form Controls">
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
           <Switch defaultChecked />
           <Checkbox defaultChecked />
           <Checkbox color="secondary" defaultChecked />

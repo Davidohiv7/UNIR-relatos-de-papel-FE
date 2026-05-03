@@ -1,4 +1,5 @@
-import { Box, type FC } from '@mui/material';
+import { Box } from '@mui/material';
+import { FC } from 'react';
 
 type Props = {
   src: string;
