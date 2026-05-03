@@ -7,7 +7,7 @@ function MainLayout() {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <Box component="main" sx={{ flex: 1 }}>
+      <Box component="main" sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Outlet />
       </Box>
       <Footer />

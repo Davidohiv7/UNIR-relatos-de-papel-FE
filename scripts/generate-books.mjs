@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputFile = resolve(rootDir, 'src/mocks/books.mock.ts');
+const cartOutputFile = resolve(rootDir, 'src/mocks/shopping-cart.mock.ts');
 const userAgent = 'Relatos de Papel Frontend (copilot@unir.local)';
 const targetCount = 1000;
 const pageSize = 100;
@@ -247,8 +248,11 @@ async function fetchSearchPage(query, page) {
   url.searchParams.set('page', String(page));
   url.searchParams.set('sort', 'key');
 
+  console.log(`Fetching data from Open Library... Query: "${query}", Page: ${page}`);
+
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
+      console.log(`Attempt ${attempt}/3 for query "${query}"...`);
       const response = await fetch(url, {
         headers: {
           'User-Agent': userAgent,
@@ -259,8 +263,10 @@ async function fetchSearchPage(query, page) {
         throw new Error(`Open Library responded with ${response.status}`);
       }
 
+      console.log(`Successfully fetched data for query "${query}" (Page ${page})`);
       return await response.json();
     } catch (error) {
+      console.warn(`Error on attempt ${attempt}/3 for query "${query}": ${error.message}`);
       if (attempt === 3) {
         throw error;
       }
@@ -276,6 +282,8 @@ async function generateBooks() {
   const books = [];
   const seenKeys = new Set();
 
+  console.log('Starting book generation process...');
+
   for (let page = 1; page <= maxPages && books.length < targetCount; page += 1) {
     for (const query of querySpecs) {
       if (books.length >= targetCount) {
@@ -284,6 +292,7 @@ async function generateBooks() {
 
       const searchResult = await fetchSearchPage(query, page);
       const docs = Array.isArray(searchResult?.docs) ? searchResult.docs : [];
+      let addedInBatch = 0;
 
       for (const doc of docs) {
         if (books.length >= targetCount) {
@@ -301,8 +310,10 @@ async function generateBooks() {
 
         seenKeys.add(key);
         books.push(buildBook(doc, books.length));
+        addedInBatch += 1;
       }
 
+      console.log(`Added ${addedInBatch} new books. Total progress: ${books.length}/${targetCount}`);
       await wait(200);
     }
   }
@@ -313,7 +324,32 @@ async function generateBooks() {
     );
   }
 
+  console.log(`Successfully generated ${books.length} books.`);
   return books.slice(0, targetCount);
+}
+
+function generateShoppingCart(books) {
+  console.log('Generating random shopping cart mock...');
+  const cart = {};
+  const selectedIndices = new Set();
+
+  while (selectedIndices.size < 4) {
+    const randomIndex = Math.floor(Math.random() * books.length);
+    selectedIndices.add(randomIndex);
+  }
+
+  for (const index of selectedIndices) {
+    const book = books[index];
+    const quantity = Math.floor(Math.random() * book.stock) + 1;
+    cart[book.id] = {
+      book,
+      quantity,
+    };
+    console.log(`Added book ID ${book.id} to cart with quantity ${quantity}`);
+  }
+
+  console.log('Shopping cart mock generation completed.');
+  return cart;
 }
 
 function serializeBooks(books) {
@@ -322,19 +358,33 @@ function serializeBooks(books) {
     .replace(/"format": "digital"/g, 'format: BookFormat.DIGITAL');
 }
 
+function serializeCart(cart) {
+  return JSON.stringify(cart, null, 2)
+    .replace(/"format": "fisico"/g, 'format: BookFormat.PHYSICAL')
+    .replace(/"format": "digital"/g, 'format: BookFormat.DIGITAL');
+}
+
 async function main() {
+  console.log('--- RELATOS DE PAPEL MOCK GENERATOR ---');
   const books = await generateBooks();
 
-  const content = `import { BookFormat, type Book } from '../types';
+  console.log(`Serializing books data and writing to ${outputFile}...`);
+  const booksContent = `import { BookFormat, type Book } from '../types';\n\nexport const books: Book[] = ${serializeBooks(books)};\n`;
 
-export const books: Book[] = ${serializeBooks(books)};
-`;
+  await writeFile(outputFile, booksContent, 'utf8');
+  console.log(`File created successfully: ${outputFile}`);
 
-  await writeFile(outputFile, content, 'utf8');
-  console.log(`Generated ${books.length} books at ${outputFile}`);
+  const cart = generateShoppingCart(books);
+
+  console.log(`Serializing cart data and writing to ${cartOutputFile}...`);
+  const cartContent = `import { BookFormat, type Book } from '../types';\nimport type { Cart } from '../types/cart.types';\n\nexport const mockCart: Cart = ${serializeCart(cart)};\n`;
+
+  await writeFile(cartOutputFile, cartContent, 'utf8');
+  console.log(`File created successfully: ${cartOutputFile}`);
+  console.log('--- GENERATION PROCESS FINISHED ---');
 }
 
 main().catch(error => {
-  console.error(error);
+  console.error('Fatal error during mock generation:', error);
   process.exitCode = 1;
 });

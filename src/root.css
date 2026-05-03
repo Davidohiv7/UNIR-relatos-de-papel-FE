@@ -1,3 +1,10 @@
-:root {
-  /* we need to define our basic styles, or align with the style or component library, depending on what we decide to use */
+body {
+  min-height: 100vh;
 }
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+

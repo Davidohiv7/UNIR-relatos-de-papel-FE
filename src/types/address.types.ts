@@ -4,3 +4,5 @@ export type Address = {
   line2?: string;
   city: string;
 };
+
+export type AddressInput = Omit<Address, 'id'>;

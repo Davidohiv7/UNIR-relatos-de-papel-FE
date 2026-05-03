@@ -27,10 +27,16 @@ export default defineConfig([
     },
     rules: {
       'prettier/prettier': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': 'error',
       'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
-    },
   },
+}
 ]);
