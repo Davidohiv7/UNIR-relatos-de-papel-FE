@@ -28,7 +28,9 @@ const writeStoredCart = (cart: Cart): void => {
 
   try {
     storage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-  } catch {}
+  } catch {
+    // Ignore write failures (private mode or storage quota).
+  }
 };
 
 const clearStoredCart = (): void => {

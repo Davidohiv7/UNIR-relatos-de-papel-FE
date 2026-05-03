@@ -313,7 +313,9 @@ async function generateBooks() {
         addedInBatch += 1;
       }
 
-      console.log(`Added ${addedInBatch} new books. Total progress: ${books.length}/${targetCount}`);
+      console.log(
+        `Added ${addedInBatch} new books. Total progress: ${books.length}/${targetCount}`
+      );
       await wait(200);
     }
   }

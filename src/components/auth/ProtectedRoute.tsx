@@ -16,7 +16,7 @@ function ProtectedRoute() {
     if (!customer) {
       navigate(getProtectedRouteRedirect(location));
     }
-  }, [isInitializing, customer, location]);
+  }, [isInitializing, customer, location, navigate]);
 
   if (isInitializing) {
     return (

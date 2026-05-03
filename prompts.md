@@ -31,10 +31,17 @@ Hemos decidido implementar MUI como libreria de UI. Configuralo en el proyecto. 
 
 ### Prompt 1
 
-```text
+````text
 Analiza toda la aplicacion actual y creame los siguientes dos archivos (.github/copilot-instructions.md y .cursorrules) basados en lo que ya configurado y armado, ademas del contexto de siguiente actividad:
 Datos del estudiante
-Nombre y apellidos        Nombre y apellidos del estudiante
+
+### Prompt 6
+
+```text
+arregla esto  npm run lint:fix
+````
+
+Nombre y apellidos Nombre y apellidos del estudiante
 
 Actividad 1 (Exclusivamente Grupal).
 Desarrollo front-end: SPA con React
@@ -94,13 +101,14 @@ https://dotcursorrules.com/
 https://code.visualstudio.com/docs/copilot/customization/custom-instructions
 https://github.com/github/awesome-copilot/blob/main/docs/README.instructions.md
 https://github.com/devbyray/github-copilot-starter
-```
+
+````
 
 ### Prompt 2
 
 ```text
 Continua y quiero que esos dos archivos tengan un scope de cada carpeta y documento , presente y posibe futuro a crear, basado en lo que te pase anteriormente como contexto. Dejalos muy detallados para que cualquiera que realice cambios con IA tenga  el mismo contexto. Ademas, no me avises nada hasta que termines estas tareas por completo
-```
+````
 
 ### Prompt 3
 

@@ -2,6 +2,7 @@ import { type FC } from 'react';
 import { Box, Button, Card, CardContent, Divider, Stack, Typography } from '@mui/material';
 import type { Cart } from '../../types/cart.types';
 import BookImage from '../book/book-image';
+import { formatPrice } from '../../utils/price.utils';
 
 type Props = {
   cart: Cart;
@@ -24,11 +25,7 @@ const CheckoutOrderSummary: FC<Props> = ({ cart, canPay, onPay, onGoToCatalog })
         <Stack spacing={2}>
           {items.map(item => (
             <Box key={item.book.id} sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-              <BookImage
-                src={item.book.pictures[0]?.url ?? ''}
-                alt={item.book.title}
-                size={48}
-              />
+              <BookImage src={item.book.pictures[0]?.url ?? ''} alt={item.book.title} size={48} />
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }} noWrap>
                   {item.book.title}
@@ -43,7 +40,7 @@ const CheckoutOrderSummary: FC<Props> = ({ cart, canPay, onPay, onGoToCatalog })
                 )}
               </Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, flexShrink: 0 }}>
-                ${(item.book.price * item.quantity).toFixed(2)}
+                {formatPrice(item.book.price * item.quantity)}
               </Typography>
             </Box>
           ))}
@@ -56,18 +53,12 @@ const CheckoutOrderSummary: FC<Props> = ({ cart, canPay, onPay, onGoToCatalog })
             Total
           </Typography>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            ${total.toFixed(2)}
+            {formatPrice(total)}
           </Typography>
         </Box>
 
         <Stack spacing={1}>
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            disabled={!canPay}
-            onClick={onPay}
-          >
+          <Button variant="contained" fullWidth size="large" disabled={!canPay} onClick={onPay}>
             Confirmar y pagar
           </Button>
           <Button variant="text" fullWidth onClick={onGoToCatalog}>

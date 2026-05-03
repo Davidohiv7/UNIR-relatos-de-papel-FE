@@ -5,6 +5,7 @@ import { useShoppingCart } from '../../hooks';
 import { DeleteOutlineOutlined } from '@mui/icons-material';
 import BookImage from '../book/book-image';
 import { QuantityInput } from '../inputs/quantity-input';
+import { formatPrice } from '../../utils/price.utils';
 
 type ShoppingCartItemProps = {
   item: CartItem;
@@ -29,7 +30,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({ item }) => {
             }}
           >
             <Typography variant="subtitle1" sx={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
-              ${(item.book.price * item.quantity).toFixed(2)}
+              {formatPrice(item.book.price * item.quantity)}
             </Typography>
 
             <QuantityInput
