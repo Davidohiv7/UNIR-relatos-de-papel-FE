@@ -13,17 +13,20 @@ type FooterLink = {
 type ColumnProps = {
   title: string;
   links: FooterLink[];
+  route: string;
 };
 
-function FooterColumn({ title, links }: ColumnProps) {
+function FooterColumn({ title, links, route }: ColumnProps) {
   return (
     <Stack spacing={1.5}>
-      <Typography
-        variant="overline"
-        sx={{ fontWeight: 700, letterSpacing: 1.5, color: 'common.white' }}
-      >
-        {title}
-      </Typography>
+      <Link to={route} style={{ textDecoration: 'none' }} onClick={links[0].onClick}>
+        <Typography
+          variant="overline"
+          sx={{ fontWeight: 700, letterSpacing: 1.5, color: 'common.white' }}
+        >
+          {title}
+        </Typography>
+      </Link>
       {links.map(({ label, to, onClick }) => (
         <Link key={label} to={to} style={{ textDecoration: 'none' }} onClick={onClick}>
           <Typography
@@ -116,8 +119,8 @@ function Footer() {
             </Typography>
           </Stack>
 
-          <FooterColumn title="Catálogo" links={catalogLinks} />
-          <FooterColumn title="Mi Cuenta" links={accountLinks} />
+          <FooterColumn title="Catálogo" links={catalogLinks} route={ROUTES.catalog} />
+          <FooterColumn title="Mi Cuenta" links={accountLinks} route={ROUTES.profile} />
         </Box>
 
         <Divider sx={{ my: { xs: 3, md: 4 }, borderColor: 'rgba(255,255,255,0.15)' }} />
