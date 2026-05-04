@@ -53,11 +53,7 @@ const CheckoutAddressPicker: FC<Props> = ({
             <Typography variant="body2" color="text.secondary">
               Haz clic en <strong>Agregar dirección</strong> para continuar con tu compra.
             </Typography>
-            <Button
-              startIcon={<Add />}
-              variant="contained"
-              onClick={() => setIsModalOpen(true)}
-            >
+            <Button startIcon={<Add />} variant="contained" onClick={() => setIsModalOpen(true)}>
               Agregar dirección
             </Button>
           </Box>

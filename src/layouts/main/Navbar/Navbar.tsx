@@ -1,4 +1,4 @@
-import { AppBar, Box, Stack, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import { Link } from 'react-router';
 import { BrandIcon } from '../../../components/ui';
 import { ROUTES } from '../../../config/navigation/navigation.config';
@@ -15,25 +15,28 @@ function Navbar() {
         bgcolor: 'background.paper',
         borderBottom: 1,
         borderColor: 'divider',
-        py: { xs: 1, sm: 0 },
       }}
     >
-      <Toolbar
-        sx={{
-          justifyContent: 'space-between',
-          flexDirection: { xs: 'column', sm: 'row' },
-        }}
-      >
-        <Link to={ROUTES.catalog} style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-            <BrandIcon />
-            <Typography variant="h4" sx={{ color: 'primary.main' }}>
-              Relatos de Papel
-            </Typography>
-          </Stack>
-        </Link>
+      <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 } }}>
+        <Tooltip title="Ir al catálogo" placement="bottom">
+          <Link to={ROUTES.catalog} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <BrandIcon />
+              <Typography
+                variant="h5"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  display: { xs: 'none', sm: 'block' },
+                }}
+              >
+                Relatos de Papel
+              </Typography>
+            </Stack>
+          </Link>
+        </Tooltip>
 
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <CatalogAction />
           <AuthAction />
           <ShoppingCartAction />

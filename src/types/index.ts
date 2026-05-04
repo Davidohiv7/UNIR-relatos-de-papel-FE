@@ -15,3 +15,10 @@ export type { Picture } from './picture.types';
 export type { Category } from './category.types';
 
 export type { Tag } from './tag.types';
+
+export type {
+  CatalogFilterValues,
+  CatalogPriceRange,
+  CatalogSortBy,
+  CatalogSortOrder,
+} from './catalog.types';

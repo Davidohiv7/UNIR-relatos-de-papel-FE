@@ -37,6 +37,6 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': 'error',
       'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
+    },
   },
-}
 ]);

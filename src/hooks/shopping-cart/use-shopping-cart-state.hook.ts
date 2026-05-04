@@ -2,24 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { Cart } from '../../types/cart.types';
 import { clearStoredCart, readStoredCart, writeStoredCart } from '../../utils/shopping-cart.utils';
 import { Book } from '../../types';
-import { USE_MOCK } from '../../services/config';
-import { mockCart } from '../../mocks/shopping-cart.mock';
 
 export function useShoppingCartState() {
-  const [cart, setCart] = useState<Cart>(() => {
-    const storedCart = readStoredCart();
-
-    if (storedCart && Object.keys(storedCart).length > 0) {
-      return storedCart;
-    }
-
-    if (USE_MOCK) {
-      writeStoredCart(mockCart);
-      return mockCart;
-    }
-
-    return {};
-  });
+  const [cart, setCart] = useState<Cart>(() => readStoredCart() ?? {});
 
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
@@ -35,7 +20,7 @@ export function useShoppingCartState() {
   const addItem = useCallback((book: Book, quantity: number = 1) => {
     setCart(prev => {
       const existingItem = prev[book.id];
-      const newCart = {
+      const newCart: Cart = {
         ...prev,
         [book.id]: {
           book,
@@ -68,12 +53,9 @@ export function useShoppingCartState() {
         return newCart;
       }
 
-      const newCart = {
+      const newCart: Cart = {
         ...prev,
-        [bookId]: {
-          ...prev[bookId],
-          quantity,
-        },
+        [bookId]: { ...prev[bookId], quantity },
       };
       writeStoredCart(newCart);
       return newCart;
@@ -85,11 +67,5 @@ export function useShoppingCartState() {
     setCart({});
   }, []);
 
-  return {
-    cart,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-  };
+  return { cart, addItem, removeItem, updateQuantity, clearCart };
 }

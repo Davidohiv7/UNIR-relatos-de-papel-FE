@@ -4,3 +4,5 @@ export { useShoppingCartState } from './shopping-cart/use-shopping-cart-state.ho
 export { useShoppingCart } from './shopping-cart/use-shopping-cart.hook';
 export { useAddressState } from './address/use-address-state.hook';
 export { useAlert } from './alert/use-alert.hook';
+export { useCatalogSearchParams } from './catalog/use-catalog-search-params.hook';
+export type { CatalogParams } from './catalog/use-catalog-search-params.hook';
