@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -30,19 +30,8 @@ function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<BookFiltersMetadata>(emptyMeta);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const filterTimeoutRef = useRef<number | null>(null);
-
   // All filter/sort/page state lives in the URL
   const { params, setParams, clearParams } = useCatalogSearchParams(metadata);
-
-  useEffect(() => {
-    return () => {
-      if (filterTimeoutRef.current !== null) {
-        window.clearTimeout(filterTimeoutRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -83,11 +72,10 @@ function CatalogPage() {
         language: params.language,
         priceRange: params.priceRange,
       },
-      metadata.priceRange,
       params.sortBy,
       params.sortOrder
     );
-  }, [books, params, metadata.priceRange]);
+  }, [books, params]);
 
   const totalPages = Math.max(1, Math.ceil(filteredBooks.length / PAGE_SIZE));
   const pagedBooks = useMemo(() => {
@@ -107,29 +95,15 @@ function CatalogPage() {
     if (params.categoryId !== 'all') count += 1;
     if (params.format !== 'all') count += 1;
     if (params.language !== 'all') count += 1;
-    if (isPriceRangeActive(params.priceRange, metadata.priceRange)) count += 1;
+    if (isPriceRangeActive(params.priceRange)) count += 1;
     return count;
   }, [params, metadata.priceRange]);
 
-  const triggerFilterSkeleton = () => {
-    if (loading) return;
-    setIsFiltering(true);
-    if (filterTimeoutRef.current !== null) {
-      window.clearTimeout(filterTimeoutRef.current);
-    }
-    filterTimeoutRef.current = window.setTimeout(() => {
-      setIsFiltering(false);
-      filterTimeoutRef.current = null;
-    }, 50);
-  };
-
   const handleClearFilters = () => {
-    triggerFilterSkeleton();
     clearParams();
   };
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
-    triggerFilterSkeleton();
     setParams({ page: value });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -180,13 +154,9 @@ function CatalogPage() {
                   }}
                   categories={metadata.categories}
                   languages={metadata.languages}
-                  priceLimits={metadata.priceRange}
                   activeFiltersCount={activeFiltersCount}
                   onApplyFilters={val => {
-                    const priceFilterActive = isPriceRangeActive(
-                      val.priceRange,
-                      metadata.priceRange
-                    );
+                    const priceFilterActive = isPriceRangeActive(val.priceRange);
                     triggerFilterSkeleton();
                     setParams({
                       search: val.search,
@@ -206,17 +176,11 @@ function CatalogPage() {
                   totalResults={filteredBooks.length}
                   sortBy={params.sortBy}
                   sortOrder={params.sortOrder}
-                  onSortByChange={val => {
-                    triggerFilterSkeleton();
-                    setParams({ sortBy: val });
-                  }}
-                  onSortOrderChange={val => {
-                    triggerFilterSkeleton();
-                    setParams({ sortOrder: val });
-                  }}
+                  onSortByChange={val => setParams({ sortBy: val })}
+                  onSortOrderChange={val => setParams({ sortOrder: val })}
                 />
 
-                {(loading || isFiltering) && (
+                {loading && (
                   <Box
                     sx={{
                       display: 'grid',
@@ -234,7 +198,7 @@ function CatalogPage() {
                   </Box>
                 )}
 
-                {!loading && !isFiltering && filteredBooks.length === 0 && (
+                {!loading && filteredBooks.length === 0 && (
                   <Fade in timeout={300}>
                     <Card variant="outlined" sx={{ borderRadius: 3 }}>
                       <CardContent>
@@ -252,27 +216,25 @@ function CatalogPage() {
                   </Fade>
                 )}
 
-                {!loading && !isFiltering && filteredBooks.length > 0 && (
-                  <Fade in timeout={250}>
-                    <Box
-                      sx={{
-                        display: 'grid',
-                        gap: 2,
-                        gridTemplateColumns: {
-                          xs: '1fr',
-                          sm: 'repeat(2, 1fr)',
-                          lg: 'repeat(3, 1fr)',
-                        },
-                      }}
-                    >
-                      {pagedBooks.map(book => (
-                        <BookCard key={book.id} book={book} />
-                      ))}
-                    </Box>
-                  </Fade>
+                {!loading && filteredBooks.length > 0 && (
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gap: 2,
+                      gridTemplateColumns: {
+                        xs: '1fr',
+                        sm: 'repeat(2, 1fr)',
+                        lg: 'repeat(3, 1fr)',
+                      },
+                    }}
+                  >
+                    {pagedBooks.map(book => (
+                      <BookCard key={book.id} book={book} />
+                    ))}
+                  </Box>
                 )}
 
-                {!loading && !isFiltering && filteredBooks.length > 0 && totalPages > 1 && (
+                {!loading && filteredBooks.length > 0 && totalPages > 1 && (
                   <Stack sx={{ alignItems: 'center', pt: 2 }}>
                     <Pagination
                       count={totalPages}

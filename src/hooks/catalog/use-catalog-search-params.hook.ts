@@ -25,10 +25,7 @@ type SetterFn = (
   patch: Partial<Omit<CatalogParams, 'priceRange'> & { priceRange?: CatalogPriceRange }>
 ) => void;
 
-function readParams(
-  params: URLSearchParams,
-  priceLimits: { min: number; max: number }
-): CatalogParams {
+function readParams(params: URLSearchParams): CatalogParams {
   const p = CATALOG_PARAMS;
 
   const search = params.get(p.search) ?? '';
@@ -47,7 +44,7 @@ function readParams(
   const maxRaw = params.get(p.maxPrice);
   const minPrice = minRaw !== null && !isNaN(Number(minRaw)) ? Number(minRaw) : null;
   const maxPrice = maxRaw !== null && !isNaN(Number(maxRaw)) ? Number(maxRaw) : null;
-  const priceRange = normalizePriceRange(minPrice, maxPrice, priceLimits);
+  const priceRange = normalizePriceRange(minPrice, maxPrice);
 
   const sortByRaw = params.get(p.sortBy) ?? '';
   const sortBy: CatalogSortBy = VALID_SORT_BY.includes(sortByRaw as CatalogSortBy)
@@ -65,11 +62,7 @@ function readParams(
   return { search, categoryId, format, language, priceRange, sortBy, sortOrder, page };
 }
 
-function writeParams(
-  current: URLSearchParams,
-  patch: Parameters<SetterFn>[0],
-  priceLimits: { min: number; max: number }
-): URLSearchParams {
+function writeParams(current: URLSearchParams, patch: Parameters<SetterFn>[0]): URLSearchParams {
   const next = new URLSearchParams(current);
   const p = CATALOG_PARAMS;
 
@@ -92,9 +85,9 @@ function writeParams(
   }
   if ('priceRange' in patch && patch.priceRange) {
     const [lo, hi] = patch.priceRange;
-    if (lo > priceLimits.min) next.set(p.minPrice, String(lo));
+    if (lo > 0) next.set(p.minPrice, String(lo));
     else next.delete(p.minPrice);
-    if (hi < priceLimits.max) next.set(p.maxPrice, String(hi));
+    if (hi !== Infinity) next.set(p.maxPrice, String(hi));
     else next.delete(p.maxPrice);
   }
   if ('sortBy' in patch) {
@@ -117,23 +110,21 @@ function writeParams(
   return next;
 }
 
-export function useCatalogSearchParams(metadata: BookFiltersMetadata) {
+export function useCatalogSearchParams(_metadata: BookFiltersMetadata) {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchParamsKey = searchParams.toString();
 
-  const priceLimits = metadata.priceRange;
-
   const params: CatalogParams = useMemo(
-    () => readParams(searchParams, priceLimits),
+    () => readParams(searchParams),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchParamsKey, priceLimits.min, priceLimits.max]
+    [searchParamsKey]
   );
 
   const setParams: SetterFn = useCallback(
     patch => {
-      setSearchParams(prev => writeParams(prev, patch, priceLimits), { replace: true });
+      setSearchParams(prev => writeParams(prev, patch), { replace: true });
     },
-    [setSearchParams, priceLimits]
+    [setSearchParams]
   );
 
   const clearParams = useCallback(() => {

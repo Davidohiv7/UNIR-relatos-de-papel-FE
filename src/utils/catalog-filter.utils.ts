@@ -6,8 +6,6 @@ import type {
   CatalogSortOrder,
 } from '../types/catalog.types';
 
-type PriceLimits = { min: number; max: number };
-
 export const roundPrice = (value: number): number => Math.round(value * 100) / 100;
 
 export const parsePriceInput = (value: string): number | null => {
@@ -19,40 +17,24 @@ export const parsePriceInput = (value: string): number | null => {
 
 export const normalizePriceRange = (
   minValue: number | null,
-  maxValue: number | null,
-  priceLimits: PriceLimits
+  maxValue: number | null
 ): CatalogPriceRange => {
-  const fallbackMin = Number.isFinite(priceLimits.min) ? priceLimits.min : 0;
-  const fallbackMax = Number.isFinite(priceLimits.max) ? priceLimits.max : fallbackMin;
-  const lowerLimit = Math.min(fallbackMin, fallbackMax);
-  const upperLimit = Math.max(fallbackMin, fallbackMax);
+  const safeMin = minValue !== null ? roundPrice(minValue) : null;
+  const safeMax = maxValue !== null ? roundPrice(maxValue) : null;
 
-  const safeMin = minValue === null ? lowerLimit : minValue;
-  const safeMax = maxValue === null ? upperLimit : maxValue;
-  const orderedMin = Math.min(safeMin, safeMax);
-  const orderedMax = Math.max(safeMin, safeMax);
-
-  return [
-    roundPrice(Math.max(lowerLimit, orderedMin)),
-    roundPrice(Math.min(upperLimit, orderedMax)),
-  ];
+  if (safeMin !== null && safeMax !== null) {
+    return [Math.min(safeMin, safeMax), Math.max(safeMin, safeMax)];
+  }
+  return [safeMin ?? 0, safeMax ?? Infinity];
 };
 
-export const isPriceRangeActive = (
-  priceRange: CatalogPriceRange,
-  priceLimits: PriceLimits
-): boolean => {
-  return (
-    priceLimits.max > 0 && (priceRange[0] > priceLimits.min || priceRange[1] < priceLimits.max)
-  );
+export const isPriceRangeActive = (priceRange: CatalogPriceRange): boolean => {
+  return priceRange[0] > 0 || priceRange[1] !== Infinity;
 };
 
-export const filterBooks = (
-  books: Book[],
-  filters: CatalogFilterValues,
-  priceLimits: PriceLimits
-): Book[] => {
+export const filterBooks = (books: Book[], filters: CatalogFilterValues): Book[] => {
   const q = filters.search.trim().toLowerCase();
+  const priceActive = isPriceRangeActive(filters.priceRange);
 
   return books.filter(book => {
     const matchesSearch =
@@ -65,8 +47,7 @@ export const filterBooks = (
       filters.language === 'all' ||
       book.language.toLowerCase() === String(filters.language).toLowerCase();
     const matchesPrice =
-      priceLimits.max <= 0 ||
-      (book.price >= filters.priceRange[0] && book.price <= filters.priceRange[1]);
+      !priceActive || (book.price >= filters.priceRange[0] && book.price <= filters.priceRange[1]);
 
     return matchesSearch && matchesCategory && matchesFormat && matchesLanguage && matchesPrice;
   });
@@ -90,12 +71,11 @@ export const sortBooks = (
 export const getVisibleCatalogBooks = (
   books: Book[],
   filters: CatalogFilterValues,
-  priceLimits: PriceLimits,
   sortBy: CatalogSortBy,
   sortOrder: CatalogSortOrder
 ): Book[] => {
-  const filtered = filterBooks(books, filters, priceLimits);
-  const priceFilterActive = isPriceRangeActive(filters.priceRange, priceLimits);
+  const filtered = filterBooks(books, filters);
+  const priceFilterActive = isPriceRangeActive(filters.priceRange);
 
   return sortBooks(
     filtered,

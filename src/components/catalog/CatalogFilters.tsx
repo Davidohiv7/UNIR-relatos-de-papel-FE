@@ -1,6 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -24,9 +23,8 @@ import {
   isPriceRangeActive,
   normalizePriceRange,
   parsePriceInput,
-  roundPrice,
 } from '../../utils/catalog-filter.utils';
-import { CURRENCY_SYMBOL, formatPrice } from '../../utils/price.utils';
+import { CURRENCY_SYMBOL } from '../../utils/price.utils';
 
 export type CatalogFiltersValues = CatalogFilterValues;
 
@@ -34,7 +32,6 @@ type Props = {
   values: CatalogFiltersValues;
   categories: Category[];
   languages: string[];
-  priceLimits: { min: number; max: number };
   activeFiltersCount: number;
   onApplyFilters: (value: CatalogFiltersValues) => void;
   onClearFilters: () => void;
@@ -46,57 +43,29 @@ const formatLabel = (format: BookFormat): string => {
 
 const getInitialPriceInput = (
   value: number,
-  priceRange: CatalogFilterValues['priceRange'],
-  priceLimits: { min: number; max: number }
+  priceRange: CatalogFilterValues['priceRange']
 ): string => {
-  return isPriceRangeActive(priceRange, priceLimits) ? String(value) : '';
+  return isPriceRangeActive(priceRange) ? String(value === Infinity ? '' : value) : '';
 };
 
 function CatalogFilters({
   values,
   categories,
   languages,
-  priceLimits,
   activeFiltersCount,
   onApplyFilters,
   onClearFilters,
 }: Props) {
-  // Local input state so typing feels instant (filters apply on demand)
   const [searchInput, setSearchInput] = useState(values.search);
   const [categoryInput, setCategoryInput] = useState<number | 'all'>(values.categoryId);
   const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(values.format);
   const [languageInput, setLanguageInput] = useState<string | 'all'>(values.language);
   const [minInput, setMinInput] = useState(
-    getInitialPriceInput(values.priceRange[0], values.priceRange, priceLimits)
+    getInitialPriceInput(values.priceRange[0], values.priceRange)
   );
   const [maxInput, setMaxInput] = useState(
-    getInitialPriceInput(values.priceRange[1], values.priceRange, priceLimits)
+    getInitialPriceInput(values.priceRange[1], values.priceRange)
   );
-
-  const priceReady = priceLimits.max > priceLimits.min;
-  const pricePresets = priceReady
-    ? (() => {
-        const span = priceLimits.max - priceLimits.min;
-        const step = span / 5;
-
-        return Array.from({ length: 5 }, (_, index) => {
-          const minValue =
-            index === 0 ? priceLimits.min : roundPrice(priceLimits.min + step * index);
-          const maxValue =
-            index === 4 ? priceLimits.max : roundPrice(priceLimits.min + step * (index + 1));
-
-          return {
-            label:
-              index === 0
-                ? `Hasta ${formatPrice(maxValue)}`
-                : index === 4
-                  ? `Desde ${formatPrice(minValue)}`
-                  : `${formatPrice(minValue)} - ${formatPrice(maxValue)}`,
-            range: [minValue, maxValue] as const,
-          };
-        });
-      })()
-    : [];
 
   const handleCategoryChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
@@ -124,11 +93,7 @@ function CatalogFilters({
   };
 
   const handleApplyFilters = () => {
-    const priceRange = normalizePriceRange(
-      parsePriceInput(minInput),
-      parsePriceInput(maxInput),
-      priceLimits
-    );
+    const priceRange = normalizePriceRange(parsePriceInput(minInput), parsePriceInput(maxInput));
 
     onApplyFilters({
       search: searchInput,
@@ -137,22 +102,6 @@ function CatalogFilters({
       language: languageInput,
       priceRange,
     });
-  };
-
-  const handlePresetClick = (range: readonly [number, number]) => {
-    setMinInput(String(range[0]));
-    setMaxInput(String(range[1]));
-    onApplyFilters({
-      search: searchInput,
-      categoryId: categoryInput,
-      format: formatInput,
-      language: languageInput,
-      priceRange: normalizePriceRange(range[0], range[1], priceLimits),
-    });
-  };
-
-  const isPresetActive = (range: readonly [number, number]): boolean => {
-    return Number(minInput) === range[0] && Number(maxInput) === range[1];
   };
 
   return (
@@ -242,7 +191,7 @@ function CatalogFilters({
                 label="Mínimo"
                 type="number"
                 value={minInput}
-                placeholder={priceReady ? String(priceLimits.min) : '0'}
+                placeholder="0"
                 onChange={handleMinPriceChange}
                 size="small"
                 fullWidth
@@ -259,7 +208,7 @@ function CatalogFilters({
                 label="Máximo"
                 type="number"
                 value={maxInput}
-                placeholder={priceReady ? String(priceLimits.max) : '0'}
+                placeholder="0"
                 onChange={handleMaxPriceChange}
                 size="small"
                 fullWidth
@@ -273,51 +222,6 @@ function CatalogFilters({
                 }}
               />
             </Stack>
-            {pricePresets.length > 0 && (
-              <Box
-                sx={{
-                  display: 'grid',
-                  gap: 1,
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
-                  '& > :last-of-type': {
-                    gridColumn: { sm: '1 / -1' },
-                  },
-                }}
-              >
-                {pricePresets.map(preset => (
-                  <Button
-                    key={preset.label}
-                    size="small"
-                    variant="outlined"
-                    color={isPresetActive(preset.range) ? 'primary' : 'inherit'}
-                    onClick={() => handlePresetClick(preset.range)}
-                    sx={{
-                      justifyContent: 'flex-start',
-                      minHeight: 42,
-                      px: 1.25,
-                      py: 1,
-                      borderRadius: 1.5,
-                      borderColor: isPresetActive(preset.range) ? 'primary.main' : 'divider',
-                      bgcolor: isPresetActive(preset.range) ? 'primary.50' : 'background.paper',
-                      color: isPresetActive(preset.range) ? 'primary.main' : 'text.primary',
-                      textTransform: 'none',
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        bgcolor: 'action.hover',
-                      },
-                    }}
-                  >
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      sx={{ fontWeight: 700, lineHeight: 1.2, textAlign: 'left' }}
-                    >
-                      {preset.label}
-                    </Typography>
-                  </Button>
-                ))}
-              </Box>
-            )}
           </Stack>
 
           <Divider />
