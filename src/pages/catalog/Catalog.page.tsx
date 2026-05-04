@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -30,6 +30,7 @@ function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<BookFiltersMetadata>(emptyMeta);
+  const [filterResetKey, setFilterResetKey] = useState(0);
   // All filter/sort/page state lives in the URL
   const { params, setParams, clearParams } = useCatalogSearchParams(metadata);
 
@@ -97,11 +98,12 @@ function CatalogPage() {
     if (params.language !== 'all') count += 1;
     if (isPriceRangeActive(params.priceRange)) count += 1;
     return count;
-  }, [params, metadata.priceRange]);
+  }, [params]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     clearParams();
-  };
+    setFilterResetKey(k => k + 1);
+  }, [clearParams]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setParams({ page: value });
@@ -144,7 +146,7 @@ function CatalogPage() {
             >
               <Box sx={{ alignSelf: 'start' }}>
                 <CatalogFilters
-                  key={`${params.search}-${params.categoryId}-${params.format}-${params.language}-${params.priceRange[0]}-${params.priceRange[1]}`}
+                  key={filterResetKey}
                   values={{
                     search: params.search,
                     categoryId: params.categoryId,
@@ -157,7 +159,6 @@ function CatalogPage() {
                   activeFiltersCount={activeFiltersCount}
                   onApplyFilters={val => {
                     const priceFilterActive = isPriceRangeActive(val.priceRange);
-                    triggerFilterSkeleton();
                     setParams({
                       search: val.search,
                       categoryId: val.categoryId,

@@ -83,17 +83,24 @@ function CatalogFilters({
   };
 
   const handleMinPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextMin = event.target.value;
-    setMinInput(nextMin);
+    setMinInput(event.target.value);
   };
 
   const handleMaxPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextMax = event.target.value;
-    setMaxInput(nextMax);
+    setMaxInput(event.target.value);
   };
 
+  const parsedMin = parsePriceInput(minInput);
+  const parsedMax = parsePriceInput(maxInput);
+  const priceRangeError =
+    parsedMin !== null && parsedMax !== null && parsedMin >= parsedMax
+      ? 'El mínimo debe ser menor que el máximo'
+      : null;
+
   const handleApplyFilters = () => {
-    const priceRange = normalizePriceRange(parsePriceInput(minInput), parsePriceInput(maxInput));
+    if (priceRangeError) return;
+
+    const priceRange = normalizePriceRange(parsedMin, parsedMax);
 
     onApplyFilters({
       search: searchInput,
@@ -184,7 +191,7 @@ function CatalogFilters({
             </Select>
           </FormControl>
 
-          <Stack spacing={1.5}>
+          <Stack spacing={0.5}>
             <Typography variant="subtitle2">Rango de precios</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <TextField
@@ -195,6 +202,7 @@ function CatalogFilters({
                 onChange={handleMinPriceChange}
                 size="small"
                 fullWidth
+                error={!!priceRangeError}
                 slotProps={{
                   htmlInput: { min: 0, step: 0.1 },
                   input: {
@@ -212,6 +220,7 @@ function CatalogFilters({
                 onChange={handleMaxPriceChange}
                 size="small"
                 fullWidth
+                error={!!priceRangeError}
                 slotProps={{
                   htmlInput: { min: 0, step: 0.1 },
                   input: {
@@ -222,6 +231,11 @@ function CatalogFilters({
                 }}
               />
             </Stack>
+            {priceRangeError && (
+              <Typography variant="caption" color="error">
+                {priceRangeError}
+              </Typography>
+            )}
           </Stack>
 
           <Divider />
