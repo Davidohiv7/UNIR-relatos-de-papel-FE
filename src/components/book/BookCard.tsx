@@ -50,7 +50,7 @@ function BookCard({ book }: Props) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: 3,
+        borderRadius: 2,
         transition: 'box-shadow 0.2s ease, transform 0.2s ease',
         '&:hover': {
           boxShadow: 4,
@@ -63,7 +63,7 @@ function BookCard({ book }: Props) {
         },
       }}
     >
-      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 2, '&:last-child': { pb: 2 } }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ position: 'relative', flexShrink: 0 }}>
             <BookImage src={cover} alt={book.title} size={88} />
@@ -81,7 +81,7 @@ function BookCard({ book }: Props) {
               }}
             />
           </Box>
-          <Stack spacing={0.75} sx={{ minWidth: 0, flexGrow: 1 }}>
+          <Stack spacing={1} sx={{ minWidth: 0, flexGrow: 1 }}>
             <Tooltip title={book.title} placement="top" enterDelay={700}>
               <Typography
                 variant="subtitle1"
@@ -116,21 +116,25 @@ function BookCard({ book }: Props) {
                 ({book.reviewsCount})
               </Typography>
             </Stack>
-            <Typography variant="h6" color="primary" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+            <Typography
+              variant="h6"
+              color="primary"
+              sx={{ fontWeight: 700, lineHeight: 1.2, pt: 0.5 }}
+            >
               {formatPrice(book.price)}
             </Typography>
           </Stack>
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ px: 2, pb: 2, pt: 0.5, gap: 1 }}>
+      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0, gap: 1 }}>
         <Button
           component={Link}
           to={route}
           variant="outlined"
           size="small"
           startIcon={<InfoOutlined />}
-          sx={{ borderRadius: 2, flexShrink: 0 }}
+          sx={{ borderRadius: 1.5, flexShrink: 0 }}
         >
           Detalle
         </Button>
@@ -141,7 +145,7 @@ function BookCard({ book }: Props) {
           onClick={handleAdd}
           startIcon={added ? <CheckCircleOutlined /> : <ShoppingBagOutlined />}
           color={added ? 'success' : inCart ? 'secondary' : 'primary'}
-          sx={{ borderRadius: 2, flexGrow: 1, transition: 'background-color 0.2s' }}
+          sx={{ borderRadius: 1.5, flexGrow: 1, transition: 'background-color 0.2s' }}
         >
           {added ? '¡Añadido!' : inCart ? 'Añadir más' : 'Al carrito'}
         </Button>

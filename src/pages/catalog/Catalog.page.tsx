@@ -16,6 +16,7 @@ import { CatalogFilters, CatalogToolbar } from '../../components/catalog';
 import { booksService, type BookFiltersMetadata } from '../../services';
 import { useCatalogSearchParams } from '../../hooks';
 import type { Book } from '../../types';
+import { getVisibleCatalogBooks, isPriceRangeActive } from '../../utils/catalog-filter.utils';
 
 const PAGE_SIZE = 12;
 const emptyMeta: BookFiltersMetadata = {
@@ -41,6 +42,10 @@ function CatalogPage() {
         window.clearTimeout(filterTimeoutRef.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
   // Load books + metadata once
@@ -69,41 +74,20 @@ function CatalogPage() {
 
   // Derived: filtered + sorted list
   const filteredBooks = useMemo(() => {
-    let result = [...books];
-
-    const q = params.search.trim().toLowerCase();
-    if (q) {
-      result = result.filter(
-        b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)
-      );
-    }
-    if (params.categoryId !== 'all') {
-      result = result.filter(b => b.categories.some(c => c.id === params.categoryId));
-    }
-    if (params.format !== 'all') {
-      result = result.filter(b => b.format === params.format);
-    }
-    if (params.language !== 'all') {
-      result = result.filter(
-        b => b.language.toLowerCase() === String(params.language).toLowerCase()
-      );
-    }
-    if (metadata.priceRange.max > 0) {
-      result = result.filter(
-        b => b.price >= params.priceRange[0] && b.price <= params.priceRange[1]
-      );
-    }
-
-    result.sort((a, b) => {
-      const dir = params.sortOrder === 'desc' ? -1 : 1;
-      if (params.sortBy === 'title') return dir * a.title.localeCompare(b.title);
-      if (params.sortBy === 'price') return dir * (a.price - b.price);
-      if (params.sortBy === 'rating') return dir * (a.rating - b.rating);
-      return dir * (a.year - b.year);
-    });
-
-    return result;
-  }, [books, params, metadata.priceRange.max]);
+    return getVisibleCatalogBooks(
+      books,
+      {
+        search: params.search,
+        categoryId: params.categoryId,
+        format: params.format,
+        language: params.language,
+        priceRange: params.priceRange,
+      },
+      metadata.priceRange,
+      params.sortBy,
+      params.sortOrder
+    );
+  }, [books, params, metadata.priceRange]);
 
   const totalPages = Math.max(1, Math.ceil(filteredBooks.length / PAGE_SIZE));
   const pagedBooks = useMemo(() => {
@@ -111,18 +95,19 @@ function CatalogPage() {
     return filteredBooks.slice(start, start + PAGE_SIZE);
   }, [filteredBooks, params.page]);
 
+  useEffect(() => {
+    if (!loading && params.page > totalPages) {
+      setParams({ page: totalPages });
+    }
+  }, [loading, params.page, setParams, totalPages]);
+
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (params.search.trim()) count += 1;
     if (params.categoryId !== 'all') count += 1;
     if (params.format !== 'all') count += 1;
     if (params.language !== 'all') count += 1;
-    if (
-      metadata.priceRange.max > 0 &&
-      (params.priceRange[0] > metadata.priceRange.min ||
-        params.priceRange[1] < metadata.priceRange.max)
-    )
-      count += 1;
+    if (isPriceRangeActive(params.priceRange, metadata.priceRange)) count += 1;
     return count;
   }, [params, metadata.priceRange]);
 
@@ -198,6 +183,10 @@ function CatalogPage() {
                   priceLimits={metadata.priceRange}
                   activeFiltersCount={activeFiltersCount}
                   onApplyFilters={val => {
+                    const priceFilterActive = isPriceRangeActive(
+                      val.priceRange,
+                      metadata.priceRange
+                    );
                     triggerFilterSkeleton();
                     setParams({
                       search: val.search,
@@ -205,6 +194,7 @@ function CatalogPage() {
                       format: val.format,
                       language: val.language,
                       priceRange: val.priceRange,
+                      ...(priceFilterActive ? { sortBy: 'price', sortOrder: 'asc' } : {}),
                     });
                   }}
                   onClearFilters={handleClearFilters}

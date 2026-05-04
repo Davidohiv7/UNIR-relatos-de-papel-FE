@@ -1,9 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import { CATALOG_PARAMS } from '../../config/navigation/navigation.config';
-import type { CatalogSortBy, CatalogSortOrder } from '../../components/catalog';
 import type { BookFiltersMetadata } from '../../services';
 import { BookFormat } from '../../types';
+import type { CatalogPriceRange, CatalogSortBy, CatalogSortOrder } from '../../types';
+import { normalizePriceRange } from '../../utils/catalog-filter.utils';
 
 const VALID_SORT_BY: CatalogSortBy[] = ['title', 'price', 'rating', 'year'];
 const VALID_SORT_ORDER: CatalogSortOrder[] = ['asc', 'desc'];
@@ -14,14 +15,14 @@ export type CatalogParams = {
   categoryId: number | 'all';
   format: BookFormat | 'all';
   language: string | 'all';
-  priceRange: [number, number];
+  priceRange: CatalogPriceRange;
   sortBy: CatalogSortBy;
   sortOrder: CatalogSortOrder;
   page: number;
 };
 
 type SetterFn = (
-  patch: Partial<Omit<CatalogParams, 'priceRange'> & { priceRange?: [number, number] }>
+  patch: Partial<Omit<CatalogParams, 'priceRange'> & { priceRange?: CatalogPriceRange }>
 ) => void;
 
 function readParams(
@@ -44,12 +45,9 @@ function readParams(
 
   const minRaw = params.get(p.minPrice);
   const maxRaw = params.get(p.maxPrice);
-  const minPrice = minRaw !== null && !isNaN(Number(minRaw)) ? Number(minRaw) : priceLimits.min;
-  const maxPrice = maxRaw !== null && !isNaN(Number(maxRaw)) ? Number(maxRaw) : priceLimits.max;
-  const priceRange: [number, number] = [
-    Math.max(priceLimits.min, Math.min(minPrice, priceLimits.max)),
-    Math.min(priceLimits.max, Math.max(maxPrice, priceLimits.min)),
-  ];
+  const minPrice = minRaw !== null && !isNaN(Number(minRaw)) ? Number(minRaw) : null;
+  const maxPrice = maxRaw !== null && !isNaN(Number(maxRaw)) ? Number(maxRaw) : null;
+  const priceRange = normalizePriceRange(minPrice, maxPrice, priceLimits);
 
   const sortByRaw = params.get(p.sortBy) ?? '';
   const sortBy: CatalogSortBy = VALID_SORT_BY.includes(sortByRaw as CatalogSortBy)

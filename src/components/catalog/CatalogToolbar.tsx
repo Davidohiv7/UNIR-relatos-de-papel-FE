@@ -14,9 +14,7 @@ import {
 } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 
-export type CatalogSortBy = 'title' | 'price' | 'rating' | 'year';
-
-export type CatalogSortOrder = 'asc' | 'desc';
+import type { CatalogSortBy, CatalogSortOrder } from '../../types';
 
 type Props = {
   totalResults: number;

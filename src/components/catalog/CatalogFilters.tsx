@@ -19,15 +19,16 @@ import {
 import { Search } from '@mui/icons-material';
 
 import type { Category } from '../../types';
-import { BookFormat } from '../../types';
+import { BookFormat, type CatalogFilterValues } from '../../types';
+import {
+  isPriceRangeActive,
+  normalizePriceRange,
+  parsePriceInput,
+  roundPrice,
+} from '../../utils/catalog-filter.utils';
+import { CURRENCY_SYMBOL, formatPrice } from '../../utils/price.utils';
 
-export type CatalogFiltersValues = {
-  search: string;
-  categoryId: number | 'all';
-  format: BookFormat | 'all';
-  language: string | 'all';
-  priceRange: [number, number];
-};
+export type CatalogFiltersValues = CatalogFilterValues;
 
 type Props = {
   values: CatalogFiltersValues;
@@ -41,6 +42,14 @@ type Props = {
 
 const formatLabel = (format: BookFormat): string => {
   return format === BookFormat.PHYSICAL ? 'Físico' : 'Digital';
+};
+
+const getInitialPriceInput = (
+  value: number,
+  priceRange: CatalogFilterValues['priceRange'],
+  priceLimits: { min: number; max: number }
+): string => {
+  return isPriceRangeActive(priceRange, priceLimits) ? String(value) : '';
 };
 
 function CatalogFilters({
@@ -57,25 +66,37 @@ function CatalogFilters({
   const [categoryInput, setCategoryInput] = useState<number | 'all'>(values.categoryId);
   const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(values.format);
   const [languageInput, setLanguageInput] = useState<string | 'all'>(values.language);
-  const [minInput, setMinInput] = useState(String(values.priceRange[0]));
-  const [maxInput, setMaxInput] = useState(String(values.priceRange[1]));
+  const [minInput, setMinInput] = useState(
+    getInitialPriceInput(values.priceRange[0], values.priceRange, priceLimits)
+  );
+  const [maxInput, setMaxInput] = useState(
+    getInitialPriceInput(values.priceRange[1], values.priceRange, priceLimits)
+  );
 
   const priceReady = priceLimits.max > priceLimits.min;
-  const roundPrice = (value: number) => Math.round(value * 100) / 100;
-  const priceLabel = (value: number) => `$${value.toFixed(2)}`;
+  const pricePresets = priceReady
+    ? (() => {
+        const span = priceLimits.max - priceLimits.min;
+        const step = span / 5;
 
-  const normalizeRange = (minValue: number, maxValue: number): [number, number] => {
-    const minRounded = roundPrice(minValue);
-    const maxRounded = roundPrice(maxValue);
-    const normalized: [number, number] =
-      minRounded <= maxRounded ? [minRounded, maxRounded] : [maxRounded, minRounded];
-    return normalized;
-  };
+        return Array.from({ length: 5 }, (_, index) => {
+          const minValue =
+            index === 0 ? priceLimits.min : roundPrice(priceLimits.min + step * index);
+          const maxValue =
+            index === 4 ? priceLimits.max : roundPrice(priceLimits.min + step * (index + 1));
 
-  const parseNumber = (value: string): number | null => {
-    const parsed = Number(value);
-    return Number.isNaN(parsed) ? null : parsed;
-  };
+          return {
+            label:
+              index === 0
+                ? `Hasta ${formatPrice(maxValue)}`
+                : index === 4
+                  ? `Desde ${formatPrice(minValue)}`
+                  : `${formatPrice(minValue)} - ${formatPrice(maxValue)}`,
+            range: [minValue, maxValue] as const,
+          };
+        });
+      })()
+    : [];
 
   const handleCategoryChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
@@ -102,58 +123,12 @@ function CatalogFilters({
     setMaxInput(nextMax);
   };
 
-  const quickRanges = priceReady
-    ? (() => {
-        const span = priceLimits.max - priceLimits.min;
-        const step = span / 4;
-        const firstMax = roundPrice(priceLimits.min + step);
-        const secondMax = roundPrice(priceLimits.min + step * 2);
-        const thirdMax = roundPrice(priceLimits.min + step * 3);
-        return [
-          { label: `Hasta ${priceLabel(firstMax)}`, range: [priceLimits.min, firstMax] as const },
-          {
-            label: `${priceLabel(firstMax)} – ${priceLabel(secondMax)}`,
-            range: [firstMax, secondMax] as const,
-          },
-          {
-            label: `${priceLabel(secondMax)} – ${priceLabel(thirdMax)}`,
-            range: [secondMax, thirdMax] as const,
-          },
-          { label: `Más de ${priceLabel(thirdMax)}`, range: [thirdMax, priceLimits.max] as const },
-        ];
-      })()
-    : [];
-
-  const parsedMin = parseNumber(minInput);
-  const parsedMax = parseNumber(maxInput);
-  const summaryLabel = (() => {
-    if (parsedMin !== null && parsedMax !== null) {
-      const [minValue, maxValue] = normalizeRange(parsedMin, parsedMax);
-      return `${priceLabel(minValue)} – ${priceLabel(maxValue)}`;
-    }
-    if (parsedMin !== null) {
-      return `Desde ${priceLabel(roundPrice(parsedMin))}`;
-    }
-    if (parsedMax !== null) {
-      return `Hasta ${priceLabel(roundPrice(parsedMax))}`;
-    }
-    return `${priceLabel(values.priceRange[0])} – ${priceLabel(values.priceRange[1])}`;
-  })();
-
   const handleApplyFilters = () => {
-    const minValue = parseNumber(minInput);
-    const maxValue = parseNumber(maxInput);
-    let priceRange: [number, number];
-
-    if (minValue !== null && maxValue !== null) {
-      priceRange = normalizeRange(minValue, maxValue);
-    } else if (minValue !== null) {
-      priceRange = normalizeRange(minValue, priceLimits.max);
-    } else if (maxValue !== null) {
-      priceRange = normalizeRange(priceLimits.min, maxValue);
-    } else {
-      priceRange = [priceLimits.min, priceLimits.max];
-    }
+    const priceRange = normalizePriceRange(
+      parsePriceInput(minInput),
+      parsePriceInput(maxInput),
+      priceLimits
+    );
 
     onApplyFilters({
       search: searchInput,
@@ -164,12 +139,28 @@ function CatalogFilters({
     });
   };
 
+  const handlePresetClick = (range: readonly [number, number]) => {
+    setMinInput(String(range[0]));
+    setMaxInput(String(range[1]));
+    onApplyFilters({
+      search: searchInput,
+      categoryId: categoryInput,
+      format: formatInput,
+      language: languageInput,
+      priceRange: normalizePriceRange(range[0], range[1], priceLimits),
+    });
+  };
+
+  const isPresetActive = (range: readonly [number, number]): boolean => {
+    return Number(minInput) === range[0] && Number(maxInput) === range[1];
+  };
+
   return (
     <Card
       variant="outlined"
-      sx={{ borderRadius: 3, position: 'sticky', top: 80, height: 'fit-content' }}
+      sx={{ borderRadius: 2, position: 'sticky', top: 80, height: 'fit-content' }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
         <Stack spacing={2.5}>
           <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6">Filtros</Typography>
@@ -244,67 +235,90 @@ function CatalogFilters({
             </Select>
           </FormControl>
 
-          <Box>
-            <Stack
-              direction="row"
-              sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
-            >
-              <Typography variant="subtitle2">Rango de precio</Typography>
-              {priceReady && (
-                <Typography variant="caption" color="text.secondary">
-                  {summaryLabel}
-                </Typography>
-              )}
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle2">Rango de precios</Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+              <TextField
+                label="Mínimo"
+                type="number"
+                value={minInput}
+                placeholder={priceReady ? String(priceLimits.min) : '0'}
+                onChange={handleMinPriceChange}
+                size="small"
+                fullWidth
+                slotProps={{
+                  htmlInput: { min: 0, step: 0.1 },
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">{CURRENCY_SYMBOL}</InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              <TextField
+                label="Máximo"
+                type="number"
+                value={maxInput}
+                placeholder={priceReady ? String(priceLimits.max) : '0'}
+                onChange={handleMaxPriceChange}
+                size="small"
+                fullWidth
+                slotProps={{
+                  htmlInput: { min: 0, step: 0.1 },
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">{CURRENCY_SYMBOL}</InputAdornment>
+                    ),
+                  },
+                }}
+              />
             </Stack>
-            <Stack spacing={1.5}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                <TextField
-                  label="Mínimo"
-                  type="number"
-                  value={minInput}
-                  onChange={handleMinPriceChange}
-                  size="small"
-                  fullWidth
-                  slotProps={{
-                    htmlInput: { step: 0.1 },
-                    input: {
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                    },
-                  }}
-                />
-                <TextField
-                  label="Máximo"
-                  type="number"
-                  value={maxInput}
-                  onChange={handleMaxPriceChange}
-                  size="small"
-                  fullWidth
-                  slotProps={{
-                    htmlInput: { step: 0.1 },
-                    input: {
-                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                    },
-                  }}
-                />
-              </Stack>
-              {priceReady && (
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-                  {quickRanges.map(range => (
-                    <Chip
-                      key={range.label}
-                      label={range.label}
-                      size="small"
-                      onClick={() => {
-                        const [minValue, maxValue] = range.range;
-                        setMinInput(String(minValue));
-                        setMaxInput(String(maxValue));
-                      }}
-                    />
-                  ))}
-                </Stack>
-              )}
-            </Stack>
-          </Box>
+            {pricePresets.length > 0 && (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: 1,
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+                  '& > :last-of-type': {
+                    gridColumn: { sm: '1 / -1' },
+                  },
+                }}
+              >
+                {pricePresets.map(preset => (
+                  <Button
+                    key={preset.label}
+                    size="small"
+                    variant="outlined"
+                    color={isPresetActive(preset.range) ? 'primary' : 'inherit'}
+                    onClick={() => handlePresetClick(preset.range)}
+                    sx={{
+                      justifyContent: 'flex-start',
+                      minHeight: 42,
+                      px: 1.25,
+                      py: 1,
+                      borderRadius: 1.5,
+                      borderColor: isPresetActive(preset.range) ? 'primary.main' : 'divider',
+                      bgcolor: isPresetActive(preset.range) ? 'primary.50' : 'background.paper',
+                      color: isPresetActive(preset.range) ? 'primary.main' : 'text.primary',
+                      textTransform: 'none',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      sx={{ fontWeight: 700, lineHeight: 1.2, textAlign: 'left' }}
+                    >
+                      {preset.label}
+                    </Typography>
+                  </Button>
+                ))}
+              </Box>
+            )}
+          </Stack>
 
           <Divider />
 

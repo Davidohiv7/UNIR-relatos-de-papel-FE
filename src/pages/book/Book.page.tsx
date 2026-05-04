@@ -153,6 +153,8 @@ function BookPage() {
     );
   }
 
+  if (!activeBook) return <BookDetailSkeleton />;
+
   const cover = activeBook.pictures[0]?.url ?? '';
   const stockWarning = activeBook.stock > 0 && activeBook.stock <= 5;
   const outOfStock = activeBook.stock === 0;

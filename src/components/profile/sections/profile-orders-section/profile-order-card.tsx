@@ -2,6 +2,7 @@ import { Card, CardContent, Stack, Typography } from '@mui/material';
 import type { Order } from '../../../../types';
 import { formatDateTimeEs } from '../../../../utils/date.utils';
 import { FC } from 'react';
+import { formatPrice } from '../../../../utils/price.utils';
 
 type Props = {
   order: Order;
@@ -27,7 +28,7 @@ const ProfileOrderCard: FC<Props> = ({ order }) => {
               {itemCount} {itemCount === 1 ? 'libro' : 'libros'}
             </Typography>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              ${order.total.toFixed(2)}
+              {formatPrice(order.total)}
             </Typography>
           </Stack>
         </Stack>
