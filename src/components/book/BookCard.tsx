@@ -65,7 +65,22 @@ function BookCard({ book }: Props) {
     >
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
-          <BookImage src={cover} alt={book.title} size={88} />
+          <Box sx={{ position: 'relative', flexShrink: 0 }}>
+            <BookImage src={cover} alt={book.title} size={88} />
+            <Chip
+              label={book.year}
+              size="small"
+              color="secondary"
+              sx={{
+                position: 'absolute',
+                right: 6,
+                bottom: 6,
+                height: 20,
+                fontSize: '0.68rem',
+                fontWeight: 600,
+              }}
+            />
+          </Box>
           <Stack spacing={0.75} sx={{ minWidth: 0, flexGrow: 1 }}>
             <Tooltip title={book.title} placement="top" enterDelay={700}>
               <Typography

@@ -1,4 +1,4 @@
-import { useState, type SyntheticEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Slider,
   Stack,
   TextField,
   Typography,
@@ -36,11 +35,7 @@ type Props = {
   languages: string[];
   priceLimits: { min: number; max: number };
   activeFiltersCount: number;
-  onSearchChange: (value: string) => void;
-  onCategoryChange: (value: number | 'all') => void;
-  onFormatChange: (value: BookFormat | 'all') => void;
-  onLanguageChange: (value: string | 'all') => void;
-  onPriceRangeChange: (value: [number, number]) => void;
+  onApplyFilters: (value: CatalogFiltersValues) => void;
   onClearFilters: () => void;
 };
 
@@ -54,47 +49,120 @@ function CatalogFilters({
   languages,
   priceLimits,
   activeFiltersCount,
-  onSearchChange,
-  onCategoryChange,
-  onFormatChange,
-  onLanguageChange,
-  onPriceRangeChange,
+  onApplyFilters,
   onClearFilters,
 }: Props) {
-  // Local slider state so dragging feels instant (no URL re-render on every tick)
-  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>(values.priceRange);
+  // Local input state so typing feels instant (filters apply on demand)
+  const [searchInput, setSearchInput] = useState(values.search);
+  const [categoryInput, setCategoryInput] = useState<number | 'all'>(values.categoryId);
+  const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(values.format);
+  const [languageInput, setLanguageInput] = useState<string | 'all'>(values.language);
+  const [minInput, setMinInput] = useState(String(values.priceRange[0]));
+  const [maxInput, setMaxInput] = useState(String(values.priceRange[1]));
+
+  const priceReady = priceLimits.max > priceLimits.min;
+  const roundPrice = (value: number) => Math.round(value * 100) / 100;
+  const priceLabel = (value: number) => `$${value.toFixed(2)}`;
+
+  const normalizeRange = (minValue: number, maxValue: number): [number, number] => {
+    const minRounded = roundPrice(minValue);
+    const maxRounded = roundPrice(maxValue);
+    const normalized: [number, number] =
+      minRounded <= maxRounded ? [minRounded, maxRounded] : [maxRounded, minRounded];
+    return normalized;
+  };
+
+  const parseNumber = (value: string): number | null => {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
 
   const handleCategoryChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
-    onCategoryChange(value === 'all' ? 'all' : Number(value));
+    setCategoryInput(value === 'all' ? 'all' : Number(value));
   };
 
   const handleFormatChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value as BookFormat | 'all';
-    onFormatChange(value);
+    setFormatInput(value);
   };
 
   const handleLanguageChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
-    onLanguageChange(value === 'all' ? 'all' : value);
+    setLanguageInput(value === 'all' ? 'all' : value);
   };
 
-  const handlePriceChange = (_: Event, value: number | number[]): void => {
-    if (Array.isArray(value) && value.length === 2) {
-      setLocalPriceRange([value[0], value[1]]);
+  const handleMinPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextMin = event.target.value;
+    setMinInput(nextMin);
+  };
+
+  const handleMaxPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextMax = event.target.value;
+    setMaxInput(nextMax);
+  };
+
+  const quickRanges = priceReady
+    ? (() => {
+        const span = priceLimits.max - priceLimits.min;
+        const step = span / 4;
+        const firstMax = roundPrice(priceLimits.min + step);
+        const secondMax = roundPrice(priceLimits.min + step * 2);
+        const thirdMax = roundPrice(priceLimits.min + step * 3);
+        return [
+          { label: `Hasta ${priceLabel(firstMax)}`, range: [priceLimits.min, firstMax] as const },
+          {
+            label: `${priceLabel(firstMax)} – ${priceLabel(secondMax)}`,
+            range: [firstMax, secondMax] as const,
+          },
+          {
+            label: `${priceLabel(secondMax)} – ${priceLabel(thirdMax)}`,
+            range: [secondMax, thirdMax] as const,
+          },
+          { label: `Más de ${priceLabel(thirdMax)}`, range: [thirdMax, priceLimits.max] as const },
+        ];
+      })()
+    : [];
+
+  const parsedMin = parseNumber(minInput);
+  const parsedMax = parseNumber(maxInput);
+  const summaryLabel = (() => {
+    if (parsedMin !== null && parsedMax !== null) {
+      const [minValue, maxValue] = normalizeRange(parsedMin, parsedMax);
+      return `${priceLabel(minValue)} – ${priceLabel(maxValue)}`;
     }
-  };
-
-  const handlePriceChangeCommitted = (
-    _: Event | SyntheticEvent,
-    value: number | number[]
-  ): void => {
-    if (Array.isArray(value) && value.length === 2) {
-      onPriceRangeChange([value[0], value[1]]);
+    if (parsedMin !== null) {
+      return `Desde ${priceLabel(roundPrice(parsedMin))}`;
     }
-  };
+    if (parsedMax !== null) {
+      return `Hasta ${priceLabel(roundPrice(parsedMax))}`;
+    }
+    return `${priceLabel(values.priceRange[0])} – ${priceLabel(values.priceRange[1])}`;
+  })();
 
-  const priceReady = priceLimits.max > priceLimits.min;
+  const handleApplyFilters = () => {
+    const minValue = parseNumber(minInput);
+    const maxValue = parseNumber(maxInput);
+    let priceRange: [number, number];
+
+    if (minValue !== null && maxValue !== null) {
+      priceRange = normalizeRange(minValue, maxValue);
+    } else if (minValue !== null) {
+      priceRange = normalizeRange(minValue, priceLimits.max);
+    } else if (maxValue !== null) {
+      priceRange = normalizeRange(priceLimits.min, maxValue);
+    } else {
+      priceRange = [priceLimits.min, priceLimits.max];
+    }
+
+    onApplyFilters({
+      search: searchInput,
+      categoryId: categoryInput,
+      format: formatInput,
+      language: languageInput,
+      priceRange,
+    });
+  };
 
   return (
     <Card
@@ -112,8 +180,8 @@ function CatalogFilters({
 
           <TextField
             label="Buscar por título o autor"
-            value={values.search}
-            onChange={event => onSearchChange(event.target.value)}
+            value={searchInput}
+            onChange={event => setSearchInput(event.target.value)}
             placeholder="Ej: El nombre del viento"
             slotProps={{
               input: {
@@ -133,7 +201,7 @@ function CatalogFilters({
             <Select
               labelId="catalog-category-label"
               label="Categoría"
-              value={String(values.categoryId)}
+              value={String(categoryInput)}
               onChange={handleCategoryChange}
             >
               <MenuItem value="all">Todas</MenuItem>
@@ -150,7 +218,7 @@ function CatalogFilters({
             <Select
               labelId="catalog-format-label"
               label="Formato"
-              value={values.format}
+              value={formatInput}
               onChange={handleFormatChange}
             >
               <MenuItem value="all">Todos</MenuItem>
@@ -164,7 +232,7 @@ function CatalogFilters({
             <Select
               labelId="catalog-language-label"
               label="Idioma"
-              value={values.language}
+              value={languageInput}
               onChange={handleLanguageChange}
             >
               <MenuItem value="all">Todos</MenuItem>
@@ -184,32 +252,65 @@ function CatalogFilters({
               <Typography variant="subtitle2">Rango de precio</Typography>
               {priceReady && (
                 <Typography variant="caption" color="text.secondary">
-                  ${localPriceRange[0].toFixed(2)} – ${localPriceRange[1].toFixed(2)}
+                  {summaryLabel}
                 </Typography>
               )}
             </Stack>
-            <Slider
-              value={priceReady ? localPriceRange : [0, 0]}
-              onChange={handlePriceChange}
-              onChangeCommitted={handlePriceChangeCommitted}
-              valueLabelDisplay="auto"
-              valueLabelFormat={v => `$${v.toFixed(2)}`}
-              min={priceLimits.min}
-              max={priceReady ? priceLimits.max : 1}
-              disabled={!priceReady}
-              disableSwap
-            />
-            <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-              <Typography variant="caption" color="text.secondary">
-                {priceReady ? `$${priceLimits.min.toFixed(2)}` : '—'}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {priceReady ? `$${priceLimits.max.toFixed(2)}` : '—'}
-              </Typography>
+            <Stack spacing={1.5}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                <TextField
+                  label="Mínimo"
+                  type="number"
+                  value={minInput}
+                  onChange={handleMinPriceChange}
+                  size="small"
+                  fullWidth
+                  slotProps={{
+                    htmlInput: { step: 0.1 },
+                    input: {
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    },
+                  }}
+                />
+                <TextField
+                  label="Máximo"
+                  type="number"
+                  value={maxInput}
+                  onChange={handleMaxPriceChange}
+                  size="small"
+                  fullWidth
+                  slotProps={{
+                    htmlInput: { step: 0.1 },
+                    input: {
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                    },
+                  }}
+                />
+              </Stack>
+              {priceReady && (
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                  {quickRanges.map(range => (
+                    <Chip
+                      key={range.label}
+                      label={range.label}
+                      size="small"
+                      onClick={() => {
+                        const [minValue, maxValue] = range.range;
+                        setMinInput(String(minValue));
+                        setMaxInput(String(maxValue));
+                      }}
+                    />
+                  ))}
+                </Stack>
+              )}
             </Stack>
           </Box>
 
           <Divider />
+
+          <Button variant="contained" onClick={handleApplyFilters} fullWidth>
+            Aplicar filtros
+          </Button>
 
           <Button variant="outlined" onClick={onClearFilters} fullWidth>
             Limpiar filtros

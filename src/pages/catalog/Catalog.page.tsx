@@ -18,53 +18,30 @@ import { useCatalogSearchParams } from '../../hooks';
 import type { Book } from '../../types';
 
 const PAGE_SIZE = 12;
-const SEARCH_DEBOUNCE_MS = 300;
-
 const emptyMeta: BookFiltersMetadata = {
   categories: [],
   languages: [],
   priceRange: { min: 0, max: 0 },
 };
 
-// Debounce hook — local to this module, only for the search input value
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
-}
-
 function CatalogPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<BookFiltersMetadata>(emptyMeta);
-
-  // Local-only input value for the search field so typing feels instant
-  const [searchInput, setSearchInput] = useState('');
-  const [filterResetKey, setFilterResetKey] = useState(0);
-  const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const filterTimeoutRef = useRef<number | null>(null);
 
   // All filter/sort/page state lives in the URL
   const { params, setParams, clearParams } = useCatalogSearchParams(metadata);
 
-  // Sync the URL search param into the local input on first load / external nav
-  const didSyncSearch = useRef(false);
   useEffect(() => {
-    if (!didSyncSearch.current) {
-      setSearchInput(params.search);
-      didSyncSearch.current = true;
-    }
-  }, [params.search]);
-
-  // Push debounced search to URL
-  useEffect(() => {
-    if (!didSyncSearch.current) return;
-    setParams({ search: debouncedSearch });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+    return () => {
+      if (filterTimeoutRef.current !== null) {
+        window.clearTimeout(filterTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Load books + metadata once
   useEffect(() => {
@@ -149,13 +126,25 @@ function CatalogPage() {
     return count;
   }, [params, metadata.priceRange]);
 
+  const triggerFilterSkeleton = () => {
+    if (loading) return;
+    setIsFiltering(true);
+    if (filterTimeoutRef.current !== null) {
+      window.clearTimeout(filterTimeoutRef.current);
+    }
+    filterTimeoutRef.current = window.setTimeout(() => {
+      setIsFiltering(false);
+      filterTimeoutRef.current = null;
+    }, 50);
+  };
+
   const handleClearFilters = () => {
-    setSearchInput('');
+    triggerFilterSkeleton();
     clearParams();
-    setFilterResetKey(k => k + 1);
   };
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+    triggerFilterSkeleton();
     setParams({ page: value });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -196,9 +185,9 @@ function CatalogPage() {
             >
               <Box sx={{ alignSelf: 'start' }}>
                 <CatalogFilters
-                  key={filterResetKey}
+                  key={`${params.search}-${params.categoryId}-${params.format}-${params.language}-${params.priceRange[0]}-${params.priceRange[1]}`}
                   values={{
-                    search: searchInput,
+                    search: params.search,
                     categoryId: params.categoryId,
                     format: params.format,
                     language: params.language,
@@ -208,25 +197,36 @@ function CatalogPage() {
                   languages={metadata.languages}
                   priceLimits={metadata.priceRange}
                   activeFiltersCount={activeFiltersCount}
-                  onSearchChange={val => setSearchInput(val)}
-                  onCategoryChange={val => setParams({ categoryId: val })}
-                  onFormatChange={val => setParams({ format: val })}
-                  onLanguageChange={val => setParams({ language: val })}
-                  onPriceRangeChange={val => setParams({ priceRange: val })}
+                  onApplyFilters={val => {
+                    triggerFilterSkeleton();
+                    setParams({
+                      search: val.search,
+                      categoryId: val.categoryId,
+                      format: val.format,
+                      language: val.language,
+                      priceRange: val.priceRange,
+                    });
+                  }}
                   onClearFilters={handleClearFilters}
                 />
               </Box>
 
               <Stack spacing={2.5}>
                 <CatalogToolbar
-                  totalResults={loading ? 0 : filteredBooks.length}
+                  totalResults={filteredBooks.length}
                   sortBy={params.sortBy}
                   sortOrder={params.sortOrder}
-                  onSortByChange={val => setParams({ sortBy: val })}
-                  onSortOrderChange={val => setParams({ sortOrder: val })}
+                  onSortByChange={val => {
+                    triggerFilterSkeleton();
+                    setParams({ sortBy: val });
+                  }}
+                  onSortOrderChange={val => {
+                    triggerFilterSkeleton();
+                    setParams({ sortOrder: val });
+                  }}
                 />
 
-                {loading && (
+                {(loading || isFiltering) && (
                   <Box
                     sx={{
                       display: 'grid',
@@ -239,12 +239,12 @@ function CatalogPage() {
                     }}
                   >
                     {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                      <BookCardSkeleton key={i} />
+                      <BookCardSkeleton key={`catalog-skeleton-${i}`} />
                     ))}
                   </Box>
                 )}
 
-                {!loading && filteredBooks.length === 0 && (
+                {!loading && !isFiltering && filteredBooks.length === 0 && (
                   <Fade in timeout={300}>
                     <Card variant="outlined" sx={{ borderRadius: 3 }}>
                       <CardContent>
@@ -262,7 +262,7 @@ function CatalogPage() {
                   </Fade>
                 )}
 
-                {!loading && filteredBooks.length > 0 && (
+                {!loading && !isFiltering && filteredBooks.length > 0 && (
                   <Fade in timeout={250}>
                     <Box
                       sx={{
@@ -282,7 +282,7 @@ function CatalogPage() {
                   </Fade>
                 )}
 
-                {!loading && filteredBooks.length > 0 && totalPages > 1 && (
+                {!loading && !isFiltering && filteredBooks.length > 0 && totalPages > 1 && (
                   <Stack sx={{ alignItems: 'center', pt: 2 }}>
                     <Pagination
                       count={totalPages}

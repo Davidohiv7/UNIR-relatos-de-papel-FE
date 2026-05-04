@@ -17,6 +17,7 @@ function BookCardSkeleton() {
           <Stack spacing={1} sx={{ flexGrow: 1, minWidth: 0 }}>
             <Skeleton variant="text" width="85%" height={24} />
             <Skeleton variant="text" width="60%" height={20} />
+            <Skeleton variant="text" width="30%" height={16} />
             <Skeleton variant="rounded" width={64} height={22} sx={{ borderRadius: 4 }} />
             <Skeleton variant="text" width="50%" height={20} />
             <Skeleton variant="text" width="40%" height={28} />
