@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -15,33 +15,53 @@ import { ShoppingBagOutlined, CheckCircleOutlined, InfoOutlined } from '@mui/ico
 import { Link } from 'react-router';
 
 import type { Book } from '../../types';
-import { BookFormat } from '../../types';
 import { ROUTES } from '../../config/navigation/navigation.config';
 import { useShoppingCart } from '../../hooks';
 import { formatPrice } from '../../utils/price.utils';
+import { FORMAT_LABELS } from '../../constants/book.constants';
 import BookImage from './book-image';
+
+const ADDED_FEEDBACK_DURATION_MS = 1800;
 
 type Props = {
   book: Book;
 };
-
-const formatLabel = (format: BookFormat): string =>
-  format === BookFormat.PHYSICAL ? 'Físico' : 'Digital';
 
 function BookCard({ book }: Props) {
   const cover = book.pictures[0]?.url ?? '';
   const route = ROUTES.book.replace(':id', String(book.id));
   const { addItem, cart } = useShoppingCart();
   const [added, setAdded] = useState(false);
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const inCart = Boolean(cart[book.id]);
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addItem(book, 1);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
-  };
+  // Cleanup timer on unmount to avoid setting state on an unmounted component
+  useEffect(() => {
+    return () => {
+      if (addedTimerRef.current !== null) {
+        clearTimeout(addedTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleAdd = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      addItem(book, 1);
+      setAdded(true);
+
+      // Clear any existing timer before starting a new one
+      if (addedTimerRef.current !== null) {
+        clearTimeout(addedTimerRef.current);
+      }
+      addedTimerRef.current = setTimeout(() => {
+        setAdded(false);
+        addedTimerRef.current = null;
+      }, ADDED_FEEDBACK_DURATION_MS);
+    },
+    [addItem, book]
+  );
 
   return (
     <Card
@@ -97,7 +117,7 @@ function BookCard({ book }: Props) {
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               <Chip
                 size="small"
-                label={formatLabel(book.format)}
+                label={FORMAT_LABELS[book.format]}
                 variant="outlined"
                 sx={{ fontSize: '0.68rem', height: 20 }}
               />

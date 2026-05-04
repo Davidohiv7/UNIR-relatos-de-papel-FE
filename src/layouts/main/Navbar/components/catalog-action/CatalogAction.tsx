@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { Box, Collapse, IconButton, InputBase, Paper, Tooltip } from '@mui/material';
 import { Search, Close } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router';
@@ -13,32 +13,38 @@ function CatalogAction() {
 
   const isOnCatalog = location.pathname === ROUTES.catalog;
 
-  const handleOpen = () => {
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  const handleOpen = useCallback(() => {
     setOpen(true);
-    setTimeout(() => inputRef.current?.focus(), 60);
-  };
+  }, []);
 
-  const handleClose = () => {
-    setOpen(false);
-    setValue('');
-  };
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault();
+      const q = value.trim();
+      if (!q) {
+        // If empty, just go to catalog or close
+        if (!isOnCatalog) navigate(ROUTES.catalog);
+        setOpen(false);
+        setValue('');
+        return;
+      }
+      navigate(buildCatalogUrl({ search: q }));
+      setOpen(false);
+      setValue('');
+    },
+    [value, isOnCatalog, navigate]
+  );
 
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const q = value.trim();
-    if (!q) {
-      // If empty, just go to catalog or close
-      if (!isOnCatalog) navigate(ROUTES.catalog);
-      handleClose();
-      return;
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setOpen(false);
+      setValue('');
     }
-    navigate(buildCatalogUrl({ search: q }));
-    handleClose();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') handleClose();
-  };
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
