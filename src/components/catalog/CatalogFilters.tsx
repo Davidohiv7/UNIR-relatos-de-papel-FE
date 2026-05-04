@@ -1,3 +1,4 @@
+import { useState, type SyntheticEvent } from 'react';
 import {
   Box,
   Button,
@@ -60,6 +61,9 @@ function CatalogFilters({
   onPriceRangeChange,
   onClearFilters,
 }: Props) {
+  // Local slider state so dragging feels instant (no URL re-render on every tick)
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>(values.priceRange);
+
   const handleCategoryChange = (event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
     onCategoryChange(value === 'all' ? 'all' : Number(value));
@@ -77,9 +81,20 @@ function CatalogFilters({
 
   const handlePriceChange = (_: Event, value: number | number[]): void => {
     if (Array.isArray(value) && value.length === 2) {
+      setLocalPriceRange([value[0], value[1]]);
+    }
+  };
+
+  const handlePriceChangeCommitted = (
+    _: Event | SyntheticEvent,
+    value: number | number[]
+  ): void => {
+    if (Array.isArray(value) && value.length === 2) {
       onPriceRangeChange([value[0], value[1]]);
     }
   };
+
+  const priceReady = priceLimits.max > priceLimits.min;
 
   return (
     <Card
@@ -162,23 +177,34 @@ function CatalogFilters({
           </FormControl>
 
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Rango de precio
-            </Typography>
+            <Stack
+              direction="row"
+              sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+            >
+              <Typography variant="subtitle2">Rango de precio</Typography>
+              {priceReady && (
+                <Typography variant="caption" color="text.secondary">
+                  ${localPriceRange[0].toFixed(2)} – ${localPriceRange[1].toFixed(2)}
+                </Typography>
+              )}
+            </Stack>
             <Slider
-              value={values.priceRange}
+              value={priceReady ? localPriceRange : [0, 0]}
               onChange={handlePriceChange}
+              onChangeCommitted={handlePriceChangeCommitted}
               valueLabelDisplay="auto"
+              valueLabelFormat={v => `$${v.toFixed(2)}`}
               min={priceLimits.min}
-              max={priceLimits.max}
+              max={priceReady ? priceLimits.max : 1}
+              disabled={!priceReady}
               disableSwap
             />
             <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
               <Typography variant="caption" color="text.secondary">
-                {priceLimits.min.toFixed(2)} $
+                {priceReady ? `$${priceLimits.min.toFixed(2)}` : '—'}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {priceLimits.max.toFixed(2)} $
+                {priceReady ? `$${priceLimits.max.toFixed(2)}` : '—'}
               </Typography>
             </Stack>
           </Box>

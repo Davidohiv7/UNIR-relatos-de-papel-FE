@@ -44,6 +44,7 @@ function CatalogPage() {
 
   // Local-only input value for the search field so typing feels instant
   const [searchInput, setSearchInput] = useState('');
+  const [filterResetKey, setFilterResetKey] = useState(0);
   const debouncedSearch = useDebounce(searchInput, SEARCH_DEBOUNCE_MS);
 
   // All filter/sort/page state lives in the URL
@@ -151,6 +152,7 @@ function CatalogPage() {
   const handleClearFilters = () => {
     setSearchInput('');
     clearParams();
+    setFilterResetKey(k => k + 1);
   };
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -194,6 +196,7 @@ function CatalogPage() {
             >
               <Box sx={{ alignSelf: 'start' }}>
                 <CatalogFilters
+                  key={filterResetKey}
                   values={{
                     search: searchInput,
                     categoryId: params.categoryId,
