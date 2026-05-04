@@ -191,7 +191,7 @@ function CatalogFilters({
             </Select>
           </FormControl>
 
-          <Stack spacing={0.5}>
+          <Stack spacing={2.5}>
             <Typography variant="subtitle2">Rango de precios</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <TextField
