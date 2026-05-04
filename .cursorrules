@@ -10,7 +10,7 @@
 - Do not hardcode brand colors outside the theme.
 - Do not create new global CSS unless the style is truly global.
 - Reuse existing components, barrels, and theme tokens before creating new files.
-- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) so the shared context and the user-facing guide stay synchronized.
+- At the end of every AI-driven iteration, update [.github/copilot-instructions.md](.github/copilot-instructions.md), [.cursorrules](.cursorrules), [README.md](README.md), and [prompts.md](prompts.md) **only if the changes introduce something meaningful** — a new component, route, hook, service, data contract change, or architectural decision. Skip the update for trivial fixes (typos, minor style tweaks, single-line patches) that add no new context. Never touch these files just to record that a file was touched.
 
 ## Scope map
 
@@ -22,13 +22,7 @@
 - `models.md` is the canonical domain model reference.
 - `prompts.md` stores reusable prompts and AI context.
 - `.env.example` is reserved for future environment variables only.
-
-Future root documents:
-
-- deployment notes or a Vercel URL file.
-- video-memory support notes or delivery evidence.
-- small feature planning notes.
-- never commit generated builds, lockfile noise, or secrets.
+- `vercel.json` configures SPA fallback routing for Vercel deployments.
 
 ### .github
 
@@ -46,8 +40,10 @@ Future `.github` folders:
 ### src/App.tsx
 
 - This is the single source of truth for routes.
+- Providers wrap routes in this order: `ThemeProvider` → `BrowserRouter` → `AuthProvider` → `ShoppingCartProvider` → `AlertProvider` → `Routes`.
+- `ProtectedRoute` guards `/checkout` and `/profile`.
+- `/login` is outside `MainLayout` (no navbar/footer).
 - Keep public routes, protected routes, and fallback routes here.
-- Keep React Router configuration declarative.
 
 ### src/root.tsx
 
@@ -73,118 +69,170 @@ Future scope:
 - add component overrides or theme tokens here when they are shared.
 - never duplicate brand values in pages when they already belong in the theme.
 
+### src/config/navigation/navigation.config.ts
+
+- `ROUTES` holds all route path constants.
+- `CATALOG_PARAMS` holds all URL query-param keys for catalog filters.
+- `buildCatalogUrl(opts)` builds a typed catalog URL from optional filter options.
+- `NAVIGATION_QUERY_PARAMS` holds `redirect` param key for auth redirects.
+- Never scatter URL string literals across pages; always use these constants.
+
 ### src/layouts/main/
 
 - `Main.layout.tsx` owns the shell and `Outlet`.
-- `Navbar.tsx` owns the sticky header and navigation affordances.
+- `Navbar/Navbar.tsx` owns the sticky header and navigation affordances.
 - `Footer.tsx` owns the footer and brand closure.
+- `Navbar/components/catalog-action/` owns the expandable inline search widget.
+- `Navbar/components/auth-action/` owns the login/profile icon and menu.
+- `Navbar/components/shopping-cart-action/` owns the cart badge and opens the drawer.
 - `index.ts` should expose the layout entry point.
-
-Future scope:
-
-- keep persistent cart UI or shell-level badges here if they are shared across routes.
-- split the shell before adding layout logic to pages.
 
 ### src/components/ui/
 
-- `BrandIcon.tsx` is the brand mark.
-- `Button.tsx` is currently a placeholder; if it stays, it must become a real typed wrapper or be replaced by MUI Button usage.
+- `BrandIcon.tsx` is the brand mark; accepts a `variant` prop (`'primary'` | `'secondary'`).
+- `Button.tsx` is a placeholder; replace with a real typed wrapper or use MUI Button directly.
 - `Examples.tsx` is the UI showcase, not production logic.
+- `CustomerAvatar.tsx` is a reusable avatar for customer display.
 - `index.ts` is the barrel export.
-
-Future scope:
-
-- add reusable primitives here: empty states, section titles, price tags, stat cards, icon badges, search fields, and shared wrappers around MUI patterns.
-- if more than one page needs a visual pattern, promote it here.
 
 ### src/components/book/
 
-- `BookCard.tsx` is the book presentation component.
+- `BookCard.tsx` is the book preview card used by catalog and related-books grid; reads from `useShoppingCart`.
+- `BookCardSkeleton.tsx` is the loading placeholder matching `BookCard` layout.
+- `book-image.tsx` renders a cover image with a seeded-color fallback when the URL is missing or broken.
 - `index.ts` is the barrel export.
 
-Future scope:
+### src/components/catalog/
 
-- create `src/components/catalog/` if the catalog gains its own grid, filter, or result components.
-- add book gallery or metadata helpers here before bloating the book page.
+- `CatalogFilters.tsx` owns the filter panel: title/author search, category, format, language, price range slider, and clear button.
+- `CatalogToolbar.tsx` owns the results count label and sort-by/sort-order controls.
+- `index.ts` exports components and their public types (`CatalogFiltersValues`, `CatalogSortBy`, `CatalogSortOrder`).
+
+### src/components/checkout/
+
+- `checkout-order-summary.tsx` shows the cart items, total, and pay/go-to-catalog buttons.
+- `checkout-address-picker.tsx` lets the user choose a shipping address.
+- `checkout-empty.tsx` renders the empty-cart state for the checkout page.
+- `index.ts` is the barrel export.
+
+### src/components/shopping-cart/
+
+- `shopping-cart-drawer.tsx` is the slide-in cart panel opened from the navbar.
+- `shopping-cart-content.tsx` composes the drawer body.
+- `shopping-cart-item.tsx` renders a single cart row with `QuantityInput` and remove button.
+- `shopping-cart-list.tsx` lists all cart items.
+- `shopping-cart-empty.tsx` renders the empty-cart CTA.
+- `index.ts` is the barrel export.
+
+### src/components/inputs/
+
+- `quantity-input.tsx` is a reusable +/− quantity stepper; used in `BookCard`, `ShoppingCartItem`, and `Book.page.tsx`.
+
+### src/components/profile/
+
+- `profile.tsx` is the top-level profile composite component.
+- `profile-layout.tsx` wraps sections in a consistent layout.
+- `profile-header/ProfileHeader.tsx` shows the customer avatar and name.
+- `profile-item-card.tsx` is the card shell for profile sections.
+- `profile-logout-button.tsx` triggers logout from context.
+- `sections/profile-form-section.tsx` lets the user update personal data.
+- `sections/profile-address-section.tsx` manages customer addresses.
+- `sections/profile-orders-section/` contains the order list and order card components.
+- `index.ts` is the barrel export.
+
+### src/components/address/
+
+- `address-card.tsx`, `address-form.tsx`, `address-list.tsx`, `add-address-modal.tsx` handle address CRUD UI.
+- `index.ts` is the barrel export.
+
+### src/components/auth/
+
+- `ProtectedRoute.tsx` redirects unauthenticated users to `/login?redirect=<current-path>`.
+- `index.ts` is the barrel export.
 
 ### src/context/
 
-- `Auth.context.tsx` is currently a placeholder.
+- `auth/Auth.context.tsx` + `Auth.provider.tsx` — auth state, login, logout, and user.
+- `shopping-cart/shopping-cart.context.tsx` + `shopping-cart.provider.tsx` — cart state backed by `useShoppingCartState`.
+- `alert/alert.context.tsx` + `alert.provider.tsx` — snackbar/toast notification system.
 - `index.ts` is the barrel export.
-
-Future scope:
-
-- add `auth/`, `cart/`, `search/`, or `profile/` subfolders when each context needs its own provider, hook, and types.
-- keep context values typed and stable.
 
 ### src/hooks/
 
-- `api/use-api.hook.ts` is currently incomplete.
-- Replace placeholder text with a real hook or retire it once feature hooks exist.
-
-Future scope:
-
-- `useAuth`, `useCart`, `useDebounce`, `useLocalStorage`, `useBookSearch`, `useCheckout`, and route-guard hooks belong here or in feature-specific hook folders.
-- hooks should compose logic, not render UI.
-
-### src/data/
-
-- This folder is currently empty.
-- Use it for typed mock data and in-memory fixtures.
-- When generating large mock catalogs, use Open Library Search and Covers APIs as the upstream source, cache the responses, and persist the generated snapshot locally in `src/mocks/books.mock.ts`.
-- Do not place live API fetches in pages just to populate mock content.
-- Respect Open Library guidance: batch requests, identify the app with a `User-Agent`, and avoid bulk-download behavior or many single-book requests.
-
-Future scope:
-
-- add static datasets for books, customers, orders, categories, filters, and seeded examples.
-- keep generators here or under `src/data/factories/` if test data generation is needed.
-- do not mix data creation with page rendering.
+- `auth/use-auth.hook.ts` — consumes `AuthContext`; exposes `user`, `login`, `logout`, `isAuthenticated`.
+- `shopping-cart/use-shopping-cart-state.hook.ts` — owns cart state, `addItem`, `removeItem`, `updateQuantity`, `clearCart`, and localStorage sync.
+- `shopping-cart/use-shopping-cart.hook.ts` — consumes `ShoppingCartContext`.
+- `customer/use-customer-state.hook.ts` — customer data fetch and update logic.
+- `address/use-address-state.hook.tsx` — address list, create, and delete logic.
+- `alert/use-alert.hook.ts` — exposes `showAlert(message, severity)`.
+- `catalog/use-catalog-search-params.hook.ts` — reads and writes all catalog filter/sort/page state to the URL via `useSearchParams`; depends on `BookFiltersMetadata` for price-range defaults.
+- `api/use-api.hook.ts` — incomplete placeholder; retire or implement.
+- `index.ts` is the barrel export.
 
 ### src/pages/
 
 - Page files must stay thin and compose reusable components.
-- `landing/Landing.page.tsx` is the public entry page.
-- `login/Login.page.tsx` is the login form; success redirects to profile.
-- `catalog/Catalog.page.tsx` is the title-only search and listing page.
-- `book/Book.page.tsx` is the book detail page and the only place where a book can be added to the cart.
-- `checkout/Checkout.page.tsx` is the protected checkout page.
-- `profile/Profile.page.tsx` is the protected profile page with user data and the last five orders.
-- `not-found/NotFound.page.tsx` is the route fallback.
-- `story-book/StoryBook.page.tsx` is the component showcase.
+- `landing/Landing.page.tsx` — public entry page.
+- `login/Login.page.tsx` — login form; success redirects to `profile` (or `redirect` param).
+- `catalog/Catalog.page.tsx` — full catalog with filters, sort, pagination, skeleton loaders, and debounced search. All filter/sort/page state lives in the URL.
+- `book/Book.page.tsx` — book detail, related books grid, stock status, and the only place where a book can be added to the cart with a quantity picker.
+- `checkout/Checkout.page.tsx` — protected; address picker + order summary; on success calls `window.alert`, clears cart, navigates to `/`.
+- `profile/Profile.page.tsx` — protected; shows profile header, form, addresses, and last orders.
+- `not-found/NotFound.page.tsx` — 404 fallback with back-to-catalog CTA.
+- `story-book/StoryBook.page.tsx` — UI component showcase.
 - `index.ts` is the page barrel export.
-
-Future scope:
-
-- if a dedicated cart route is ever added, create `src/pages/cart/Cart.page.tsx`.
-- if auth or admin screens appear later, create a new page folder only when the route is stable.
-- keep business logic out of pages and move it into hooks, context, or reusable components.
 
 ### src/types/
 
-- `book.types.ts`, `customer.types.ts`, and `order.types.ts` define the current domain model.
-- `index.ts` is the shared export surface.
+- `book.types.ts` — `Book`, `BookCategory`, `BookFormat`.
+- `customer.types.ts` — `Customer`.
+- `order.types.ts` — `Order`, `OrderStatus`.
+- `order-item.types.ts` — `OrderItem`.
+- `cart.types.ts` — `Cart` (keyed by `book.id`), `CartItem`.
+- `category.types.ts` — `Category`.
+- `tag.types.ts` — `Tag`.
+- `picture.types.ts` — `Picture`.
+- `index.ts` — shared export surface.
 
-Future scope:
+### src/services/
 
-- add `auth.types.ts`, `cart.types.ts`, `filter.types.ts`, `ui.types.ts`, or `api.types.ts` only when those domains exist.
-- keep types close to the feature, then export them through the barrel.
+- `api/apiClient.ts` — centralized `fetch` wrapper with `Authorization: Bearer` header injection and single-retry on `401`.
+- `config.ts` — exports `USE_MOCK` and `API_URL` derived from Vite env vars.
+- `books/books.service.ts` — list, detail, featured, related, search, filters metadata, and CRUD.
+- `customers/customers.service.ts` — CRUD, login, register, password change, email check.
+- `orders/orders.service.ts` — list, detail, create, update, cancel, stats, purchase check.
+- `addresses/addresses.service.ts` — list and CRUD by `customerId`.
+- `http.ts` and `index.ts` — compatibility re-exports.
+- `types.ts` — service-layer types including `BookFiltersMetadata`, `PaginatedResponse`, etc.
+
+### src/mocks/
+
+- `books.mock.ts` — large catalog generated from Open Library, with covers, categories, format, year, price, stock, rating, and review count.
+- `customer.mock.ts` — test users.
+- `orders.mock.ts` — sample orders with status.
+- `addresses.mock.ts` — addresses grouped by `customerId`.
+- `shopping-cart.mock.ts` — initial cart fixture for dev/testing.
+
+### src/utils/
+
+- `price.utils.ts` — `formatPrice(amount)` using `Intl.NumberFormat` (USD).
+- `shopping-cart.utils.ts` — `readStoredCart`, `writeStoredCart`, `clearStoredCart` for localStorage persistence under key `relatos-de-papel.cart`.
 
 ## Page contract
 
 - Landing is public.
-- Login must redirect to profile after success.
-- Catalog filters by book title only for this activity.
+- Login must redirect to profile after success (or to `?redirect=` param if present).
+- Catalog filters by title and author; supports category, format, language, and price range; all state in URL.
 - Only the book detail view may add a book to the cart.
-- Cart must remain visible on catalog and book views.
-- Checkout is protected and on success must call `window.alert`, clear the cart, then navigate to `/`.
-- Profile is protected and must show user data plus the last five orders.
+- Cart must remain visible (navbar badge + drawer) on catalog and book views.
+- Checkout is protected; on success must call `window.alert`, clear the cart, then navigate to `/`.
+- Profile is protected and must show user data plus last orders.
 - NotFound must return the user to the app.
 - StoryBook is for visual verification only.
 
 ## Styling contract
 
-- Keep the current brand palette: navy primary, warm sand secondary, white contrast.
+- Keep the current brand palette: navy primary `#1B1F3A`, warm sand secondary `#D9A77D`, white contrast.
 - Keep Inter for body text and Caveat for headings.
 - Prefer MUI components, `sx`, and theme overrides over ad hoc CSS.
 - Keep `src/root.css` for only global resets or truly global app-shell styling.
@@ -196,31 +244,9 @@ Future scope:
 - Use typed mock data until a backend exists.
 - Do not add HTTP calls into pages as a shortcut.
 - If network integration arrives later, create a dedicated `src/services/` or `src/api/` layer and keep pages thin.
-- Keep search/filter logic client-side and title-only until the assignment changes.
-
-## Future folders to create only when needed
-
-- `src/components/catalog/`
-- `src/components/cart/`
-- `src/components/forms/`
-- `src/components/profile/`
-- `src/components/landing/`
-- `src/components/auth/`
-- `src/context/cart/`
-- `src/context/search/`
-- `src/hooks/useAuth.ts`
-- `src/hooks/useCart.ts`
-- `src/hooks/useDebounce.ts`
-- `src/hooks/useLocalStorage.ts`
-- `src/data/books.ts`
-- `src/data/customers.ts`
-- `src/data/orders.ts`
-- `src/services/`
-- `src/utils/`
-- `src/constants/`
-- `src/assets/`
-- `src/test/` or `src/__tests__/`
-- `.github/instructions/`, `.github/prompts/`, `.github/agents/`, `.github/skills/`
+- Keep search/filter logic client-side until the assignment changes.
+- Cart state is persisted in `localStorage` under `relatos-de-papel.cart` and synced across tabs via the `storage` event.
+- When regenerating the book catalog, use Open Library Search and Covers APIs in batch, cache the result, and persist the snapshot in `src/mocks/books.mock.ts`. Do not fetch from pages at runtime.
 
 ## Quality and validation
 
@@ -230,3 +256,4 @@ Future scope:
 - Update barrels when new modules are added.
 - Validate the touched slice with the narrowest useful check before widening scope.
 - If a change touches a shared contract, update every consumer of that contract.
+- Avoid synchronous `setState` directly inside `useEffect`; derive state or update via async callbacks.

@@ -27,18 +27,18 @@ function App() {
           <ShoppingCartProvider>
             <AlertProvider>
               <Routes>
-              <Route path={ROUTES.login} element={<LoginPage />} />
-              <Route element={<MainLayout />}>
-                <Route path={ROUTES.home} element={<LandingPage />} />
-                <Route path={ROUTES.catalog} element={<CatalogPage />} />
-                <Route path={ROUTES.book} element={<BookPage />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path={ROUTES.checkout} element={<CheckoutPage />} />
-                  <Route path={ROUTES.profile} element={<ProfilePage />} />
+                <Route path={ROUTES.login} element={<LoginPage />} />
+                <Route element={<MainLayout />}>
+                  <Route path={ROUTES.home} element={<LandingPage />} />
+                  <Route path={ROUTES.catalog} element={<CatalogPage />} />
+                  <Route path={ROUTES.book} element={<BookPage />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path={ROUTES.checkout} element={<CheckoutPage />} />
+                    <Route path={ROUTES.profile} element={<ProfilePage />} />
+                  </Route>
                 </Route>
-              </Route>
-              <Route path={ROUTES.storyBook} element={<StoryBookPage />} />
-              <Route path={ROUTES.notFound} element={<NotFoundPage />} />
+                <Route path={ROUTES.storyBook} element={<StoryBookPage />} />
+                <Route path={ROUTES.notFound} element={<NotFoundPage />} />
               </Routes>
             </AlertProvider>
           </ShoppingCartProvider>
