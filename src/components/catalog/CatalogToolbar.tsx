@@ -92,10 +92,10 @@ function CatalogToolbar({
               aria-label="orden"
             >
               <ToggleButton value="asc" aria-label="ascendente">
-                <ArrowUpward fontSize="small" />
+                <ArrowDownward fontSize="small" />
               </ToggleButton>
               <ToggleButton value="desc" aria-label="descendente">
-                <ArrowDownward fontSize="small" />
+                <ArrowUpward fontSize="small" />
               </ToggleButton>
             </ToggleButtonGroup>
           </Stack>

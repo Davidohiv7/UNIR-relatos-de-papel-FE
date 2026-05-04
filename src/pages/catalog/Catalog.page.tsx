@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -28,9 +28,10 @@ const emptyMeta: BookFiltersMetadata = {
 function CatalogPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtering, setFiltering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<BookFiltersMetadata>(emptyMeta);
-  const [filterResetKey, setFilterResetKey] = useState(0);
+  const didMountRef = useRef(false);
   // All filter/sort/page state lives in the URL
   const { params, setParams, clearParams } = useCatalogSearchParams(metadata);
 
@@ -100,9 +101,34 @@ function CatalogPage() {
     return count;
   }, [params]);
 
+  const priceRangeKey = useMemo(
+    () => `${params.priceRange[0]}|${params.priceRange[1]}`,
+    [params.priceRange[0], params.priceRange[1]]
+  );
+
+  const filtersSignature = useMemo(
+    () =>
+      [params.search.trim(), params.categoryId, params.format, params.language, priceRangeKey].join(
+        '|'
+      ),
+    [params.search, params.categoryId, params.format, params.language, priceRangeKey]
+  );
+
+  useEffect(() => {
+    if (loading) return;
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    setFiltering(true);
+    const timeout = window.setTimeout(() => setFiltering(false), 350);
+    return () => window.clearTimeout(timeout);
+  }, [filtersSignature, loading]);
+
   const handleClearFilters = useCallback(() => {
+    setFiltering(true);
     clearParams();
-    setFilterResetKey(k => k + 1);
   }, [clearParams]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
@@ -146,7 +172,7 @@ function CatalogPage() {
             >
               <Box sx={{ alignSelf: 'start' }}>
                 <CatalogFilters
-                  key={filterResetKey}
+                  key={filtersSignature}
                   values={{
                     search: params.search,
                     categoryId: params.categoryId,
@@ -159,6 +185,7 @@ function CatalogPage() {
                   activeFiltersCount={activeFiltersCount}
                   onApplyFilters={val => {
                     const priceFilterActive = isPriceRangeActive(val.priceRange);
+                    setFiltering(true);
                     setParams({
                       search: val.search,
                       categoryId: val.categoryId,
@@ -181,6 +208,24 @@ function CatalogPage() {
                   onSortOrderChange={val => setParams({ sortOrder: val })}
                 />
 
+                {filtering && !loading && (
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gap: 2,
+                      gridTemplateColumns: {
+                        xs: '1fr',
+                        sm: 'repeat(2, 1fr)',
+                        lg: 'repeat(3, 1fr)',
+                      },
+                    }}
+                  >
+                    {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                      <BookCardSkeleton key={`catalog-filter-skeleton-${i}`} />
+                    ))}
+                  </Box>
+                )}
+
                 {loading && (
                   <Box
                     sx={{
@@ -199,7 +244,7 @@ function CatalogPage() {
                   </Box>
                 )}
 
-                {!loading && filteredBooks.length === 0 && (
+                {!loading && !filtering && filteredBooks.length === 0 && (
                   <Fade in timeout={300}>
                     <Card variant="outlined" sx={{ borderRadius: 3 }}>
                       <CardContent>
@@ -217,7 +262,7 @@ function CatalogPage() {
                   </Fade>
                 )}
 
-                {!loading && filteredBooks.length > 0 && (
+                {!loading && !filtering && filteredBooks.length > 0 && (
                   <Box
                     sx={{
                       display: 'grid',
@@ -235,7 +280,7 @@ function CatalogPage() {
                   </Box>
                 )}
 
-                {!loading && filteredBooks.length > 0 && totalPages > 1 && (
+                {!loading && !filtering && filteredBooks.length > 0 && totalPages > 1 && (
                   <Stack sx={{ alignItems: 'center', pt: 2 }}>
                     <Pagination
                       count={totalPages}
