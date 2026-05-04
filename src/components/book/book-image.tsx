@@ -1,34 +1,7 @@
-import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
+import { Box, Typography, useTheme } from '@mui/material';
 import { MenuBook } from '@mui/icons-material';
-
-const FALLBACK_COLORS = [
-  '#5C6BC0',
-  '#42A5F5',
-  '#26A69A',
-  '#66BB6A',
-  '#FFA726',
-  '#EC407A',
-  '#AB47BC',
-  '#EF5350',
-];
-
-function seedColor(text: string): string {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    hash = text.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return FALLBACK_COLORS[Math.abs(hash) % FALLBACK_COLORS.length];
-}
-
-function getInitials(title: string): string {
-  return title
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0]?.toUpperCase() ?? '')
-    .join('');
-}
+import { seedIndex, getInitials } from '../../utils/color.utils';
 
 type Props = {
   src: string;
@@ -37,8 +10,23 @@ type Props = {
 };
 
 function BookFallback({ alt, size }: { alt: string; size: number }) {
-  const bg = seedColor(alt);
+  const theme = useTheme();
+
+  const fallbackColors = useMemo(
+    () => [
+      theme.palette.primary.main,
+      theme.palette.primary.light,
+      theme.palette.primary.dark,
+      theme.palette.secondary.main,
+      theme.palette.secondary.light,
+      theme.palette.secondary.dark,
+    ],
+    [theme]
+  );
+
+  const bg = fallbackColors[seedIndex(alt, fallbackColors.length)];
   const initials = getInitials(alt);
+
   return (
     <Box
       sx={{

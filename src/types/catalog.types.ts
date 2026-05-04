@@ -4,7 +4,7 @@ export type CatalogSortBy = 'title' | 'price' | 'rating' | 'year';
 
 export type CatalogSortOrder = 'asc' | 'desc';
 
-export type CatalogPriceRange = [number, number];
+export type CatalogPriceRange = [number | null, number | null];
 
 export type CatalogFilterValues = {
   search: string;

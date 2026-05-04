@@ -1,4 +1,3 @@
-import { useState, type ChangeEvent } from 'react';
 import {
   Button,
   Card,
@@ -13,39 +12,22 @@ import {
   Stack,
   TextField,
   Typography,
-  type SelectChangeEvent,
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
 
-import type { Category } from '../../types';
-import { BookFormat, type CatalogFilterValues } from '../../types';
-import {
-  isPriceRangeActive,
-  normalizePriceRange,
-  parsePriceInput,
-} from '../../utils/catalog-filter.utils';
+import type { Category, CatalogFilterValues } from '../../types';
+import { BookFormat } from '../../types';
+import { useCatalogFilters } from '../../hooks';
 import { CURRENCY_SYMBOL } from '../../utils/price.utils';
-
-export type CatalogFiltersValues = CatalogFilterValues;
+import { FORMAT_LABELS } from '../../constants/book.constants';
 
 type Props = {
-  values: CatalogFiltersValues;
+  values: CatalogFilterValues;
   categories: Category[];
   languages: string[];
   activeFiltersCount: number;
-  onApplyFilters: (value: CatalogFiltersValues) => void;
+  onApplyFilters: (value: CatalogFilterValues) => void;
   onClearFilters: () => void;
-};
-
-const formatLabel = (format: BookFormat): string => {
-  return format === BookFormat.PHYSICAL ? 'Físico' : 'Digital';
-};
-
-const getInitialPriceInput = (
-  value: number,
-  priceRange: CatalogFilterValues['priceRange']
-): string => {
-  return isPriceRangeActive(priceRange) ? String(value === Infinity ? '' : value) : '';
 };
 
 function CatalogFilters({
@@ -56,60 +38,22 @@ function CatalogFilters({
   onApplyFilters,
   onClearFilters,
 }: Props) {
-  const [searchInput, setSearchInput] = useState(values.search);
-  const [categoryInput, setCategoryInput] = useState<number | 'all'>(values.categoryId);
-  const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(values.format);
-  const [languageInput, setLanguageInput] = useState<string | 'all'>(values.language);
-  const [minInput, setMinInput] = useState(
-    getInitialPriceInput(values.priceRange[0], values.priceRange)
-  );
-  const [maxInput, setMaxInput] = useState(
-    getInitialPriceInput(values.priceRange[1], values.priceRange)
-  );
-
-  const handleCategoryChange = (event: SelectChangeEvent<string>): void => {
-    const value = event.target.value;
-    setCategoryInput(value === 'all' ? 'all' : Number(value));
-  };
-
-  const handleFormatChange = (event: SelectChangeEvent<string>): void => {
-    const value = event.target.value as BookFormat | 'all';
-    setFormatInput(value);
-  };
-
-  const handleLanguageChange = (event: SelectChangeEvent<string>): void => {
-    const value = event.target.value;
-    setLanguageInput(value === 'all' ? 'all' : value);
-  };
-
-  const handleMinPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMinInput(event.target.value);
-  };
-
-  const handleMaxPriceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMaxInput(event.target.value);
-  };
-
-  const parsedMin = parsePriceInput(minInput);
-  const parsedMax = parsePriceInput(maxInput);
-  const priceRangeError =
-    parsedMin !== null && parsedMax !== null && parsedMin >= parsedMax
-      ? 'El mínimo debe ser menor que el máximo'
-      : null;
-
-  const handleApplyFilters = () => {
-    if (priceRangeError) return;
-
-    const priceRange = normalizePriceRange(parsedMin, parsedMax);
-
-    onApplyFilters({
-      search: searchInput,
-      categoryId: categoryInput,
-      format: formatInput,
-      language: languageInput,
-      priceRange,
-    });
-  };
+  const {
+    searchInput,
+    setSearchInput,
+    categoryInput,
+    formatInput,
+    languageInput,
+    minInput,
+    maxInput,
+    priceRangeError,
+    handleCategoryChange,
+    handleFormatChange,
+    handleLanguageChange,
+    handleMinPriceChange,
+    handleMaxPriceChange,
+    handleApplyFilters,
+  } = useCatalogFilters(values, onApplyFilters, onClearFilters);
 
   return (
     <Card
@@ -169,8 +113,8 @@ function CatalogFilters({
               onChange={handleFormatChange}
             >
               <MenuItem value="all">Todos</MenuItem>
-              <MenuItem value={BookFormat.PHYSICAL}>{formatLabel(BookFormat.PHYSICAL)}</MenuItem>
-              <MenuItem value={BookFormat.DIGITAL}>{formatLabel(BookFormat.DIGITAL)}</MenuItem>
+              <MenuItem value={BookFormat.PHYSICAL}>{FORMAT_LABELS[BookFormat.PHYSICAL]}</MenuItem>
+              <MenuItem value={BookFormat.DIGITAL}>{FORMAT_LABELS[BookFormat.DIGITAL]}</MenuItem>
             </Select>
           </FormControl>
 

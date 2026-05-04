@@ -85,9 +85,9 @@ function writeParams(current: URLSearchParams, patch: Parameters<SetterFn>[0]): 
   }
   if ('priceRange' in patch && patch.priceRange) {
     const [lo, hi] = patch.priceRange;
-    if (lo > 0) next.set(p.minPrice, String(lo));
+    if (lo !== null && lo > 0) next.set(p.minPrice, String(lo));
     else next.delete(p.minPrice);
-    if (hi !== Infinity) next.set(p.maxPrice, String(hi));
+    if (hi !== null) next.set(p.maxPrice, String(hi));
     else next.delete(p.maxPrice);
   }
   if ('sortBy' in patch) {
@@ -112,14 +112,8 @@ function writeParams(current: URLSearchParams, patch: Parameters<SetterFn>[0]): 
 
 export function useCatalogSearchParams(_metadata: BookFiltersMetadata) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchParamsKey = searchParams.toString();
 
-  const params: CatalogParams = useMemo(
-    () => readParams(searchParams),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchParamsKey]
-  );
-
+  const params: CatalogParams = useMemo(() => readParams(searchParams), [searchParams]);
   const setParams: SetterFn = useCallback(
     patch => {
       setSearchParams(prev => writeParams(prev, patch), { replace: true });

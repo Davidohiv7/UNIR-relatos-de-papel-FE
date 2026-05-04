@@ -12,7 +12,7 @@ export const parsePriceInput = (value: string): number | null => {
   if (!value.trim()) return null;
 
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 };
 
 export const normalizePriceRange = (
@@ -22,14 +22,15 @@ export const normalizePriceRange = (
   const safeMin = minValue !== null ? roundPrice(minValue) : null;
   const safeMax = maxValue !== null ? roundPrice(maxValue) : null;
 
-  if (safeMin !== null && safeMax !== null) {
-    return [Math.min(safeMin, safeMax), Math.max(safeMin, safeMax)];
+  if (safeMin !== null && safeMax !== null && safeMin > safeMax) {
+    return [safeMax, safeMin];
   }
-  return [safeMin ?? 0, safeMax ?? Infinity];
+
+  return [safeMin, safeMax];
 };
 
 export const isPriceRangeActive = (priceRange: CatalogPriceRange): boolean => {
-  return priceRange[0] > 0 || priceRange[1] !== Infinity;
+  return priceRange[0] !== null || priceRange[1] !== null;
 };
 
 export const filterBooks = (books: Book[], filters: CatalogFilterValues): Book[] => {
@@ -47,7 +48,9 @@ export const filterBooks = (books: Book[], filters: CatalogFilterValues): Book[]
       filters.language === 'all' ||
       book.language.toLowerCase() === String(filters.language).toLowerCase();
     const matchesPrice =
-      !priceActive || (book.price >= filters.priceRange[0] && book.price <= filters.priceRange[1]);
+      !priceActive ||
+      ((filters.priceRange[0] === null || book.price >= filters.priceRange[0]) &&
+        (filters.priceRange[1] === null || book.price <= filters.priceRange[1]));
 
     return matchesSearch && matchesCategory && matchesFormat && matchesLanguage && matchesPrice;
   });
@@ -73,13 +76,4 @@ export const getVisibleCatalogBooks = (
   filters: CatalogFilterValues,
   sortBy: CatalogSortBy,
   sortOrder: CatalogSortOrder
-): Book[] => {
-  const filtered = filterBooks(books, filters);
-  const priceFilterActive = isPriceRangeActive(filters.priceRange);
-
-  return sortBooks(
-    filtered,
-    priceFilterActive ? 'price' : sortBy,
-    priceFilterActive ? 'asc' : sortOrder
-  );
-};
+): Book[] => sortBooks(filterBooks(books, filters), sortBy, sortOrder);
