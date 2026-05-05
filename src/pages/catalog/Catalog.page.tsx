@@ -1,76 +1,14 @@
 import { useEffect } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Fade,
-  Pagination,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Container, Pagination, Stack } from '@mui/material';
 
-import { BookCard, BookCardSkeleton } from '../../components/book';
+import { BookCard } from '../../components/book';
 import { CatalogFilters, CatalogToolbar } from '../../components/catalog';
-import { useCatalogData, CATALOG_PAGE_SIZE } from '../../hooks';
-
-// ── Sub-components ──────────────────────────────────────────────────────────
-
-const GRID_COLUMNS = {
-  xs: '1fr',
-  sm: 'repeat(2, 1fr)',
-  lg: 'repeat(3, 1fr)',
-};
-
-function CatalogLoadingSkeleton() {
-  return (
-    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: GRID_COLUMNS }}>
-      {Array.from({ length: CATALOG_PAGE_SIZE }).map((_, i) => (
-        <BookCardSkeleton key={`catalog-skeleton-${i}`} />
-      ))}
-    </Box>
-  );
-}
-
-function CatalogEmptyState({ onClear }: { onClear: () => void }) {
-  return (
-    <Fade in timeout={300}>
-      <Card variant="outlined" sx={{ borderRadius: 3 }}>
-        <CardContent>
-          <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-            <Typography variant="h6">No encontramos libros</Typography>
-            <Typography color="text.secondary">
-              Prueba ajustando los filtros o limpia la búsqueda para ver más opciones.
-            </Typography>
-            <Button variant="contained" onClick={onClear}>
-              Limpiar filtros
-            </Button>
-          </Stack>
-        </CardContent>
-      </Card>
-    </Fade>
-  );
-}
-
-function CatalogErrorState({ message }: { message: string }) {
-  return (
-    <Card variant="outlined" sx={{ borderRadius: 3 }}>
-      <CardContent>
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle1" color="error">
-            {message}
-          </Typography>
-          <Button variant="outlined" onClick={() => window.location.reload()}>
-            Reintentar
-          </Button>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ── Main page ───────────────────────────────────────────────────────────────
+import { useCatalogData } from '../../hooks';
+import CatalogErrorState from '../../components/catalog/CatalogErrorState';
+import CatalogLoadingSkeleton from '../../components/catalog/CatalogLoadingSkeleton';
+import { CATALOG_DEFAULT_PAGE_SIZE, CATALOG_GRID_COLUMNS } from '../../constants/catalgo.constants';
+import CatalogEmptyState from '../../components/catalog/CatalogEmptyState';
+import CatalogHeader from '../../components/catalog/CatalogHeader';
 
 function CatalogPage() {
   const {
@@ -85,7 +23,7 @@ function CatalogPage() {
     activeFiltersCount,
     handleClearFilters,
     handleApplyFilters,
-  } = useCatalogData();
+  } = useCatalogData(CATALOG_DEFAULT_PAGE_SIZE);
 
   // Scroll to top on initial mount (UI concern, not in data hook)
   useEffect(() => {
@@ -110,6 +48,15 @@ function CatalogPage() {
     );
   }
 
+  // ✨ Agrupamos los valores de los filtros para usarlos tanto en inicialización como en la key
+  const currentFilterValues = {
+    search: params.search,
+    categoryId: params.categoryId,
+    format: params.format,
+    language: params.language,
+    priceRange: params.priceRange,
+  };
+
   return (
     <Box sx={{ py: { xs: 3, md: 5 } }}>
       <Container maxWidth="lg">
@@ -125,13 +72,10 @@ function CatalogPage() {
           >
             <Box sx={{ alignSelf: 'start' }}>
               <CatalogFilters
-                values={{
-                  search: params.search,
-                  categoryId: params.categoryId,
-                  format: params.format,
-                  language: params.language,
-                  priceRange: params.priceRange,
-                }}
+                // ✨ LA MAGIA: Cuando el estado externo de los filtros cambia (ej. limpiar filtros),
+                // el string cambia, React destruye el componente viejo y crea uno nuevo.
+                key={JSON.stringify(currentFilterValues)}
+                initialValues={currentFilterValues}
                 categories={metadata.categories}
                 languages={metadata.languages}
                 activeFiltersCount={activeFiltersCount}
@@ -149,14 +93,14 @@ function CatalogPage() {
                 onSortOrderChange={val => setParams({ sortOrder: val })}
               />
 
-              {loading && <CatalogLoadingSkeleton />}
+              {loading && <CatalogLoadingSkeleton pageSize={CATALOG_DEFAULT_PAGE_SIZE} />}
 
               {!loading && filteredBooks.length === 0 && (
                 <CatalogEmptyState onClear={handleClearFilters} />
               )}
 
               {!loading && filteredBooks.length > 0 && (
-                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: GRID_COLUMNS }}>
+                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: CATALOG_GRID_COLUMNS }}>
                   {pagedBooks.map(book => (
                     <BookCard key={book.id} book={book} />
                   ))}
@@ -180,17 +124,6 @@ function CatalogPage() {
         </Stack>
       </Container>
     </Box>
-  );
-}
-
-function CatalogHeader() {
-  return (
-    <Stack spacing={1}>
-      <Typography variant="h3">Catálogo</Typography>
-      <Typography color="text.secondary">
-        Explora libros físicos y digitales y ajusta los filtros según tu lectura ideal.
-      </Typography>
-    </Stack>
   );
 }
 

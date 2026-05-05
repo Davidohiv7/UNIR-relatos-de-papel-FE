@@ -7,4 +7,4 @@ export { useAlert } from './alert/use-alert.hook';
 export { useCatalogSearchParams } from './catalog/use-catalog-search-params.hook';
 export type { CatalogParams } from './catalog/use-catalog-search-params.hook';
 export { useCatalogFilters } from './catalog/use-catalog-filters.hook';
-export { useCatalogData, CATALOG_PAGE_SIZE } from './catalog/use-catalog-data.hook';
+export { useCatalogData } from './catalog/use-catalog-data.hook';

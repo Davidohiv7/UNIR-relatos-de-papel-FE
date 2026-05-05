@@ -22,7 +22,7 @@ import { CURRENCY_SYMBOL } from '../../utils/price.utils';
 import { FORMAT_LABELS } from '../../constants/book.constants';
 
 type Props = {
-  values: CatalogFilterValues;
+  initialValues: CatalogFilterValues; // ✨ Refleja que solo es el estado base
   categories: Category[];
   languages: string[];
   activeFiltersCount: number;
@@ -31,13 +31,14 @@ type Props = {
 };
 
 function CatalogFilters({
-  values,
+  initialValues,
   categories,
   languages,
   activeFiltersCount,
   onApplyFilters,
   onClearFilters,
 }: Props) {
+  // ✨ Hook limpio, sin dependencias innecesarias
   const {
     searchInput,
     setSearchInput,
@@ -53,7 +54,7 @@ function CatalogFilters({
     handleMinPriceChange,
     handleMaxPriceChange,
     handleApplyFilters,
-  } = useCatalogFilters(values, onApplyFilters, onClearFilters);
+  } = useCatalogFilters(initialValues, onApplyFilters);
 
   return (
     <Card

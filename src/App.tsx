@@ -8,7 +8,6 @@ import {
   LoginPage,
   NotFoundPage,
   ProfilePage,
-  StoryBookPage,
 } from './pages';
 import { MainLayout } from './layouts';
 import { theme } from './config/mui';
@@ -37,7 +36,6 @@ function App() {
                     <Route path={ROUTES.profile} element={<ProfilePage />} />
                   </Route>
                 </Route>
-                <Route path={ROUTES.storyBook} element={<StoryBookPage />} />
                 <Route path={ROUTES.notFound} element={<NotFoundPage />} />
               </Routes>
             </AlertProvider>

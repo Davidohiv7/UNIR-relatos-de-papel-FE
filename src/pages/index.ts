@@ -5,15 +5,5 @@ import LandingPage from './landing';
 import LoginPage from './login';
 import NotFoundPage from './not-found';
 import ProfilePage from './profile';
-import StoryBookPage from './story-book';
 
-export {
-  BookPage,
-  CatalogPage,
-  CheckoutPage,
-  LandingPage,
-  LoginPage,
-  NotFoundPage,
-  ProfilePage,
-  StoryBookPage,
-};
+export { BookPage, CatalogPage, CheckoutPage, LandingPage, LoginPage, NotFoundPage, ProfilePage };

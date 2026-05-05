@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useState, type ChangeEvent } from 'react';
+import { useCallback, useState, type ChangeEvent } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
 import { BookFormat, type CatalogFilterValues } from '../../types';
 import {
@@ -17,43 +16,22 @@ function getInitialPriceInput(
 }
 
 export function useCatalogFilters(
-  values: CatalogFilterValues,
-  onApplyFilters: (value: CatalogFilterValues) => void,
-  _onClearFilters: () => void
+  initialValues: CatalogFilterValues,
+  onApplyFilters: (value: CatalogFilterValues) => void
 ) {
-  const [searchInput, setSearchInput] = useState(values.search);
-  const [categoryInput, setCategoryInput] = useState<number | 'all'>(values.categoryId);
-  const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(values.format);
-  const [languageInput, setLanguageInput] = useState<string | 'all'>(values.language);
+  // ── Estado Borrador (Solo se inicializa al montarse el componente) ──
+  const [searchInput, setSearchInput] = useState(initialValues.search);
+  const [categoryInput, setCategoryInput] = useState<number | 'all'>(initialValues.categoryId);
+  const [formatInput, setFormatInput] = useState<BookFormat | 'all'>(initialValues.format);
+  const [languageInput, setLanguageInput] = useState<string | 'all'>(initialValues.language);
   const [minInput, setMinInput] = useState(
-    getInitialPriceInput(values.priceRange[0], values.priceRange)
+    getInitialPriceInput(initialValues.priceRange[0], initialValues.priceRange)
   );
   const [maxInput, setMaxInput] = useState(
-    getInitialPriceInput(values.priceRange[1], values.priceRange)
+    getInitialPriceInput(initialValues.priceRange[1], initialValues.priceRange)
   );
 
-  // ── Sync local state when external values change (e.g. back button, clear) ──
-  useEffect(() => {
-    setSearchInput(values.search);
-  }, [values.search]);
-
-  useEffect(() => {
-    setCategoryInput(values.categoryId);
-  }, [values.categoryId]);
-
-  useEffect(() => {
-    setFormatInput(values.format);
-  }, [values.format]);
-
-  useEffect(() => {
-    setLanguageInput(values.language);
-  }, [values.language]);
-
-  useEffect(() => {
-    setMinInput(getInitialPriceInput(values.priceRange[0], values.priceRange));
-    setMaxInput(getInitialPriceInput(values.priceRange[1], values.priceRange));
-  }, [values.priceRange]);
-
+  // ── Handlers ──
   const handleCategoryChange = useCallback((event: SelectChangeEvent<string>): void => {
     const value = event.target.value;
     setCategoryInput(value === 'all' ? 'all' : Number(value));
@@ -76,6 +54,7 @@ export function useCatalogFilters(
     setMaxInput(event.target.value);
   }, []);
 
+  // ── Validaciones locales ──
   const parsedMin = parsePriceInput(minInput);
   const parsedMax = parsePriceInput(maxInput);
   const priceRangeError =
@@ -83,8 +62,10 @@ export function useCatalogFilters(
       ? 'El mínimo debe ser menor que el máximo'
       : null;
 
+  // ── Acción de commit (Hacia afuera) ──
   const handleApplyFilters = useCallback(() => {
     if (priceRangeError) return;
+
     onApplyFilters({
       search: searchInput,
       categoryId: categoryInput,

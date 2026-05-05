@@ -3,13 +3,7 @@ import { booksService, type BookFiltersMetadata } from '../../services';
 import type { Book, CatalogFilterValues } from '../../types';
 import { useCatalogSearchParams } from './use-catalog-search-params.hook';
 import { getVisibleCatalogBooks, isPriceRangeActive } from '../../utils/catalog-filter.utils';
-
-export const CATALOG_PAGE_SIZE = 12;
-
-// TODO: Replace with server-side pagination & filtering when API supports it.
-// Currently the API does not support filter/sort query params, so we fetch a
-// reasonable batch and handle everything client-side.
-const CATALOG_FETCH_LIMIT = 1000;
+import { CATALOG_FETCH_LIMIT } from '../../constants/catalgo.constants';
 
 const EMPTY_META: BookFiltersMetadata = {
   categories: [],
@@ -17,7 +11,7 @@ const EMPTY_META: BookFiltersMetadata = {
   priceRange: { min: 0, max: 0 },
 };
 
-export function useCatalogData() {
+export function useCatalogData(pageSize: number) {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,12 +62,12 @@ export function useCatalogData() {
   );
 
   // ── Derived: pagination ──
-  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / CATALOG_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / pageSize));
 
   const pagedBooks = useMemo(() => {
-    const start = (params.page - 1) * CATALOG_PAGE_SIZE;
-    return filteredBooks.slice(start, start + CATALOG_PAGE_SIZE);
-  }, [filteredBooks, params.page]);
+    const start = (params.page - 1) * pageSize;
+    return filteredBooks.slice(start, start + pageSize);
+  }, [filteredBooks, params.page, pageSize]);
 
   // Clamp page if current page exceeds total after a filter change
   useEffect(() => {
