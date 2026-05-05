@@ -184,8 +184,6 @@ function BookPage() {
           {/* Cover — sticky on desktop */}
           <Box
             sx={{
-              position: { md: 'sticky' },
-              top: { md: 88 },
               display: 'flex',
               justifyContent: 'center',
             }}

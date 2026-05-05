@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,17 +10,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { ShoppingBagOutlined, CheckCircleOutlined, InfoOutlined } from '@mui/icons-material';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import type { Book } from '../../types';
 import { ROUTES } from '../../config/navigation/navigation.config';
-import { useShoppingCart } from '../../hooks';
 import { formatPrice } from '../../utils/price.utils';
 import { FORMAT_LABELS } from '../../constants/book.constants';
 import BookImage from './book-image';
-
-const ADDED_FEEDBACK_DURATION_MS = 1800;
+import { InfoOutlined } from '@mui/icons-material';
 
 type Props = {
   book: Book;
@@ -30,48 +26,23 @@ type Props = {
 function BookCard({ book }: Props) {
   const cover = book.pictures[0]?.url ?? '';
   const route = ROUTES.book.replace(':id', String(book.id));
-  const { addItem, cart } = useShoppingCart();
-  const [added, setAdded] = useState(false);
-  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
-  const inCart = Boolean(cart[book.id]);
-
-  // Cleanup timer on unmount to avoid setting state on an unmounted component
-  useEffect(() => {
-    return () => {
-      if (addedTimerRef.current !== null) {
-        clearTimeout(addedTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleAdd = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      addItem(book, 1);
-      setAdded(true);
-
-      // Clear any existing timer before starting a new one
-      if (addedTimerRef.current !== null) {
-        clearTimeout(addedTimerRef.current);
-      }
-      addedTimerRef.current = setTimeout(() => {
-        setAdded(false);
-        addedTimerRef.current = null;
-      }, ADDED_FEEDBACK_DURATION_MS);
-    },
-    [addItem, book]
-  );
+  const handleCardClick = () => {
+    navigate(route);
+  };
 
   return (
     <Card
       variant="outlined"
+      onClick={handleCardClick}
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
         transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+        cursor: 'pointer',
         '&:hover': {
           boxShadow: 4,
           transform: 'translateY(-2px)',
@@ -83,7 +54,7 @@ function BookCard({ book }: Props) {
         },
       }}
     >
-      <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 2, '&:last-child': { pb: 2 } }}>
+      <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 2 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ position: 'relative', flexShrink: 0 }}>
             <BookImage src={cover} alt={book.title} size={88} />
@@ -147,7 +118,7 @@ function BookCard({ book }: Props) {
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0, gap: 1 }}>
+      <CardActions sx={{ px: 2.5, pb: 2.5, pt: 0 }}>
         <Button
           component={Link}
           to={route}
@@ -157,17 +128,6 @@ function BookCard({ book }: Props) {
           sx={{ borderRadius: 1.5, flexShrink: 0 }}
         >
           Detalle
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          disableElevation
-          onClick={handleAdd}
-          startIcon={added ? <CheckCircleOutlined /> : <ShoppingBagOutlined />}
-          color={added ? 'success' : inCart ? 'secondary' : 'primary'}
-          sx={{ borderRadius: 1.5, flexGrow: 1, transition: 'background-color 0.2s' }}
-        >
-          {added ? '¡Añadido!' : inCart ? 'Añadir más' : 'Al carrito'}
         </Button>
       </CardActions>
     </Card>
