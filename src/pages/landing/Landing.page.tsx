@@ -1,34 +1,10 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router';
+import { Link as RouterLink } from 'react-router';
 import Grid from '@mui/material/Grid';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  TextField,
-  Chip,
-  Stack,
-  Paper,
-} from '@mui/material';
-import { FireTruck, Refresh, Search, Shield } from '@mui/icons-material';
+import { Box, Container, Typography, Button, Chip, Stack } from '@mui/material';
+import { FireTruck, Refresh, Shield } from '@mui/icons-material';
 
 const LandingPage: React.FC = () => {
-  const HERO_IMAGE =
-    'https://i.ibb.co/v4w6wmsv/Chat-GPT-Image-5-may-2026-22-30-33.png';
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/catalog?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/catalog');
-    }
-  };
+  const HERO_IMAGE = 'https://i.ibb.co/v4W6wmsv/Chat-GPT-Image-5-may-2026-22-30-33.png';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#faf8f5' }}>
@@ -95,41 +71,9 @@ const LandingPage: React.FC = () => {
               </Typography>
 
               <Typography sx={{ color: 'rgba(255,255,255,0.7)', mb: 4 }}>
-                Descubre miles de libros físicos y digitales. Desde clásicos atemporales hasta los
-                bestsellers más recientes.
+                Explora miles de libros físicos y digitales, desde clásicos inolvidables hasta los
+                bestsellers
               </Typography>
-
-              {/* SEARCH */}
-              <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
-                <Paper
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Search sx={{ ml: 2, color: 'gray' }} />
-                  <TextField
-                    variant="standard"
-                    placeholder="Buscar libros, autores, géneros..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    sx={{ flex: 1, mx: 2 }}
-                  />
-                  <Button
-                    type="submit"
-                    sx={{
-                      bgcolor: '#c8956c',
-                      color: 'white',
-                      px: 3,
-                      '&:hover': { bgcolor: '#b07050' },
-                    }}
-                  >
-                    Buscar
-                  </Button>
-                </Paper>
-              </Box>
 
               {/* TAGS */}
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
@@ -197,7 +141,8 @@ const LandingPage: React.FC = () => {
           }}
         >
           <Box>
-            <Typography sx={{ color: '#f0a070', mb: 1 }}>OFERTA ESPECIAL</Typography>
+            <Typography sx={{ color: '#f0a070', mb: 1 }}>INSPÍRATE HOY</Typography>
+
             <Typography
               variant="h4"
               sx={{
@@ -206,10 +151,14 @@ const LandingPage: React.FC = () => {
                 fontWeight: 700,
               }}
             >
-              Por la compra de dos o más libros
+              Descubre mundos nuevos en cada página
             </Typography>
+
             <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>
-              El envío es <b style={{ color: '#f0a070' }}>GRATIS</b>
+              Explora clásicos inolvidables, novedades y bestsellers desde la comodidad de tu
+              <Box component="span" sx={{ color: '#f0a070', fontWeight: 'bold', ml: 0.5 }}>
+                hogar
+              </Box>
             </Typography>
           </Box>
 
@@ -272,10 +221,10 @@ const LandingPage: React.FC = () => {
                   >
                     <Icon sx={{ color: iconColor }} />
                   </Box>
+
                   <Box>
-                    <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
-                      {title}
-                    </Typography>
+                    <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{title}</Typography>
+
                     <Typography variant="body2" color="text.secondary">
                       {desc}
                     </Typography>
