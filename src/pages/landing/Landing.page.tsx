@@ -1,43 +1,12 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router';
+import { Link as RouterLink } from 'react-router';
 import Grid from '@mui/material/Grid';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  TextField,
-  Chip,
-  Stack,
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
-import { Search } from '@mui/icons-material';
+import { Box, Container, Typography, Button, Chip, Stack } from '@mui/material';
 import { LANDING_BENEFITS, LANDING_CATEGORIES } from '../../constants/landing.constants';
-import { ROUTES } from '../../config/navigation/navigation.config';
 
 const LandingPage: React.FC = () => {
   const HERO_IMAGE = 'https://i.ibb.co/v4w6wmsv/Chat-GPT-Image-5-may-2026-22-30-33.png';
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
-  const theme = useTheme();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const to = ROUTES.catalog;
-    if (searchQuery.trim()) {
-      navigate(`${to}?q=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate(to);
-    }
-  };
-
-  const chipColor = React.useMemo(() => alpha(theme.palette.secondary.main, 0.1), [theme]);
-  const gradient = `linear-gradient(to right, ${theme.palette.primary.main}, ${alpha(theme.palette.primary[800] || theme.palette.primary.main, 0.8)}, transparent)`;
-  const gradientOffer = `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary[800] || theme.palette.primary.main})`;
   return (
     <Box>
       {/* HERO */}
@@ -47,7 +16,7 @@ const LandingPage: React.FC = () => {
           minHeight: 580,
           display: 'flex',
           alignItems: 'center',
-          bgcolor: theme.palette.primary.main,
+          bgcolor: 'primary.main',
           overflow: 'hidden',
         }}
       >
@@ -68,7 +37,8 @@ const LandingPage: React.FC = () => {
           sx={{
             position: 'absolute',
             inset: 0,
-            background: gradient,
+            background:
+              'linear-gradient(to right, rgba(26,26,46,1), rgba(26,26,46,0.8), transparent)',
           }}
         />
 
@@ -79,7 +49,7 @@ const LandingPage: React.FC = () => {
                 label="+248 libros disponibles"
                 sx={{
                   mb: 3,
-                  bgcolor: chipColor,
+                  bgcolor: 'rgba(255,255,255,0.1)',
                   color: 'white',
                   backdropFilter: 'blur(6px)',
                 }}
@@ -110,34 +80,10 @@ const LandingPage: React.FC = () => {
                 comienza aquí
               </Typography>
 
-              <Typography sx={{ color: 'primary.contrastText', mb: 4 }}>
-                Descubre miles de libros físicos y digitales. Desde clásicos atemporales hasta los
-                bestsellers más recientes.
+              <Typography sx={{ color: 'rgba(255,255,255,0.7)', mb: 4 }}>
+                Encuentra miles de libros físicos y digitales, desde clásicos atemporales hasta los
+                bestsellers más populares del momento.
               </Typography>
-
-              {/* SEARCH */}
-              <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
-                <Paper
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Search sx={{ ml: 2, color: 'common.grey' }} />
-                  <TextField
-                    variant="standard"
-                    placeholder="Buscar libros, autores, géneros..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    sx={{ flex: 1, mx: 2 }}
-                  />
-                  <Button type="submit" color="secondary" variant="contained">
-                    Buscar
-                  </Button>
-                </Paper>
-              </Box>
 
               {/* TAGS */}
               <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
@@ -149,7 +95,7 @@ const LandingPage: React.FC = () => {
                     component={RouterLink}
                     to={category.to}
                     sx={{
-                      bgcolor: chipColor,
+                      bgcolor: 'rgba(255,255,255,0.1)',
                       color: 'white',
                     }}
                   />
@@ -184,8 +130,10 @@ const LandingPage: React.FC = () => {
                   >
                     <Icon sx={{ color: iconColor }} />
                   </Box>
+
                   <Box>
                     <Typography sx={{ fontWeight: 600, mb: 0.5 }}>{title}</Typography>
+
                     <Typography variant="body2" color="text.secondary">
                       {desc}
                     </Typography>
@@ -202,7 +150,7 @@ const LandingPage: React.FC = () => {
             sx={{
               p: { xs: 4, md: 6 },
               borderRadius: 4,
-              background: gradientOffer,
+              background: 'linear-gradient(to right, rgba(26,26,46,1), rgba(45,45,78,1))',
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
@@ -211,7 +159,7 @@ const LandingPage: React.FC = () => {
             }}
           >
             <Box>
-              <Typography sx={{ color: 'secondary.main', mb: 1 }}>OFERTA ESPECIAL</Typography>
+              <Typography sx={{ color: '#f0a070', mb: 1 }}>INSPÍRATE HOY</Typography>
               <Typography
                 variant="h4"
                 sx={{
@@ -220,13 +168,12 @@ const LandingPage: React.FC = () => {
                   fontWeight: 700,
                 }}
               >
-                Por la compra de dos o más libros
+                Descubre mundos nuevos en cada página
               </Typography>
-              <Typography sx={{ color: 'common.white' }}>
-                El envío es{' '}
-                <Typography component="span" sx={{ color: 'secondary.text' }}>
-                  GRATIS
-                </Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                Sumérgete en clásicos inolvidables, las novedades más esperadas y los bestsellers
+                del momento, todo desde la comodidad de tu
+                <b style={{ color: '#f0a070' }}> hogar</b>
               </Typography>
             </Box>
 
