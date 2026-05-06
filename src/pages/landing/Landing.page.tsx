@@ -19,7 +19,7 @@ import { LANDING_BENEFITS, LANDING_CATEGORIES } from '../../constants/landing.co
 import { ROUTES } from '../../config/navigation/navigation.config';
 
 const LandingPage: React.FC = () => {
-  const HERO_IMAGE = 'https://i.ibb.co/v4w6wmsv/Chat-GPT-Image-5-may-2026-22-30-33.png';
+  const HERO_IMAGE = '/hero.webp';
 
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();

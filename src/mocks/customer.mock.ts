@@ -5,8 +5,8 @@ export const mockUsers: Customer[] = [
     id: 1,
     firstName: 'Ana',
     lastName: 'García López',
-    email: 'ana@relatos.com',
-    password: 'password123',
+    email: 'ana@relatos.com', // Usuario de ingreso
+    password: 'password123', // Clave de ingreso
     avatar: 'AG',
     phone: '+34 612 345 678',
   },

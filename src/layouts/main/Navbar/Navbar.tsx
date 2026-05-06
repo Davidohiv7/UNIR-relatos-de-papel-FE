@@ -1,10 +1,11 @@
-import { AppBar, Box, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Button, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import { Link } from 'react-router';
 import { BrandIcon } from '../../../components/ui';
 import { ROUTES } from '../../../config/navigation/navigation.config';
 import CatalogAction from './components/catalog-action';
 import AuthAction from './components/auth-action';
 import ShoppingCartAction from './components/shopping-cart-action';
+import { Store } from '@mui/icons-material';
 
 function Navbar() {
   return (
@@ -35,6 +36,10 @@ function Navbar() {
             </Stack>
           </Link>
         </Tooltip>
+
+        <Button startIcon={<Store />} variant="text" component={Link} to={ROUTES.catalog}>
+          Catálogo
+        </Button>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <CatalogAction />

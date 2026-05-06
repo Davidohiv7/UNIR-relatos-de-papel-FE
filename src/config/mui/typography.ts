@@ -21,4 +21,6 @@ export const typography: ThemeOptions['typography'] = {
   h4: { fontFamily: HEADING_FONT, fontWeight: 600 },
   h5: { fontFamily: HEADING_FONT, fontWeight: 600 },
   h6: { fontFamily: HEADING_FONT, fontWeight: 600 },
+  subtitle1: { fontFamily: HEADING_FONT, fontWeight: 400 },
+  subtitle2: { fontFamily: HEADING_FONT, fontWeight: 400 },
 };
