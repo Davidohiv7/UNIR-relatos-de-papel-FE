@@ -97,7 +97,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                   to={ROUTES.catalog}
                   startIcon={<KeyboardBackspace />}
                 >
-                  Volver a al catalogo
+                  Volver al catalogo
                 </Button>
               </Box>
             </>
@@ -107,20 +107,22 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
           )}
         </CardContent>
       </Card>
-      <Box
-        sx={{
-          mt: 3, // Espacio entre la tarjeta y el banner
-          bgcolor: 'common.white',
-          p: 1.5,
-          borderRadius: 4,
-          textAlign: 'center',
-          width: { xs: '90%', sm: 400 },
-        }}
-      >
-        <Typography variant="body2" sx={{ color: 'secondary.700' }}>
-          Demo: usa <strong>ana@relatos.com</strong> / <strong>password123</strong>
-        </Typography>
-      </Box>
+      {showEmailForm && (
+        <Box
+          sx={{
+            mt: 3, // Espacio entre la tarjeta y el banner
+            bgcolor: 'common.white',
+            p: 1.5,
+            borderRadius: 4,
+            textAlign: 'center',
+            width: { xs: '90%', sm: 400 },
+          }}
+        >
+          <Typography variant="body2" sx={{ color: 'secondary.700' }}>
+            Demo: usa <strong>ana@relatos.com</strong> / <strong>password123</strong>
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };
