@@ -18,8 +18,8 @@ function Navbar() {
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 } }}>
-        <Tooltip title="Ir al catálogo" placement="bottom">
-          <Link to={ROUTES.catalog} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Tooltip title="Ir al inicio" placement="bottom">
+          <Link to={ROUTES.home} style={{ textDecoration: 'none', color: 'inherit' }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <BrandIcon />
               <Typography
