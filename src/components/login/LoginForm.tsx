@@ -3,6 +3,9 @@ import GoogleIcon from '@mui/icons-material/Google';
 import Mail from '@mui/icons-material/Mail';
 import { useState } from 'react';
 import { LoginEmailForm } from './LoginEmailForm'; // IMPORTANTE: Importar el nuevo
+import { KeyboardBackspace } from '@mui/icons-material';
+import { Link } from 'react-router';
+import { ROUTES } from '../../config/navigation/navigation.config';
 
 interface LoginFormProps {
   onLogin: (email: string, pass: string) => void;
@@ -17,10 +20,9 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
     <>
       <Card
         sx={{
-          width: '100%',
-          maxWidth: 400,
+          width: { xs: '90%', sm: 400 },
           borderRadius: 4,
-          boxShadow: '0px 4px 20px rgba(0,0,0,0.08)',
+          boxShadow: 2,
         }}
       >
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
@@ -40,7 +42,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                   variant="outlined"
                   fullWidth
                   startIcon={<Mail />}
-                  onClick={() => setShowEmailForm(true)} // CAMBIA: Ahora solo abre el form
+                  onClick={() => setShowEmailForm(true)}
                   sx={{
                     py: 1.5,
                     px: 3,
@@ -67,7 +69,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                   variant="outlined"
                   fullWidth
                   startIcon={<GoogleIcon sx={{ color: '#db4437' }} />}
-                  onClick={() => onLogin('ana@relatos.com', 'password123')} // Google se queda igual por ahora
+                  onClick={() => onLogin('ana@relatos.com', 'password123')}
                   sx={{
                     py: 1.5,
                     px: 3,
@@ -89,6 +91,14 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                     Cuenta Google
                   </Typography>
                 </Button>
+                <Button
+                  variant="text"
+                  component={Link}
+                  to={ROUTES.catalog}
+                  startIcon={<KeyboardBackspace />}
+                >
+                  Volver a al catalogo
+                </Button>
               </Box>
             </>
           ) : (
@@ -100,17 +110,14 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       <Box
         sx={{
           mt: 3, // Espacio entre la tarjeta y el banner
-          bgcolor: '#fff9e6',
+          bgcolor: 'common.white',
           p: 1.5,
           borderRadius: 4,
-          border: '1px solid #ffeeba',
           textAlign: 'center',
-          width: '100%',
-          maxWidth: 400, // Para que tenga el mismo ancho que la tarjeta
-          visibility: !showEmailForm ? 'hidden' : 'visible',
+          width: { xs: '90%', sm: 400 },
         }}
       >
-        <Typography variant="body2" sx={{ color: '#856404' }}>
+        <Typography variant="body2" sx={{ color: 'secondary.700' }}>
           Demo: usa <strong>ana@relatos.com</strong> / <strong>password123</strong>
         </Typography>
       </Box>

@@ -18,6 +18,11 @@ function AuthActionsList({ anchorEl, open, onClose }: Props) {
     navigate(ROUTES.profile);
   };
 
+  const goToLogin = () => {
+    onClose();
+    navigate(ROUTES.login);
+  };
+
   const handleLogout = () => {
     onClose();
     logout();
@@ -26,7 +31,7 @@ function AuthActionsList({ anchorEl, open, onClose }: Props) {
   if (!customer) {
     return (
       <Menu anchorEl={anchorEl} open={open} onClose={onClose}>
-        <MenuItem onClick={goToProfile}>Iniciar sesión</MenuItem>
+        <MenuItem onClick={goToLogin}>Iniciar sesión</MenuItem>
       </Menu>
     );
   }

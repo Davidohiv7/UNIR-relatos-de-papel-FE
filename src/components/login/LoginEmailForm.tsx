@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { KeyboardBackspace } from '@mui/icons-material';
 
 interface LoginEmailFormProps {
   onLogin: (email: string, pass: string) => void;
@@ -96,19 +97,9 @@ export const LoginEmailForm = ({ onLogin, onBack }: LoginEmailFormProps) => {
           Iniciar sesión
         </Button>
 
-        <Typography
-          variant="body2"
-          onClick={onBack}
-          sx={{
-            textAlign: 'center',
-            color: 'text.secondary',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            mb: 0,
-          }}
-        >
+        <Button variant="text" onClick={onBack} startIcon={<KeyboardBackspace />}>
           Volver a opciones
-        </Typography>
+        </Button>
       </Box>
     </>
   );
