@@ -36,8 +36,8 @@ const LandingPage: React.FC = () => {
   };
 
   const chipColor = React.useMemo(() => alpha(theme.palette.secondary.main, 0.1), [theme]);
-  const gradient = `linear-gradient(to right, ${theme.palette.primary.main}, ${alpha(theme.palette.primary[800], 0.8)}, transparent)`;
-  const gradientOffer = `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary[800]})`;
+  const gradient = `linear-gradient(to right, ${theme.palette.primary.main}, ${alpha(theme.palette.primary[800] || theme.palette.primary.main, 0.8)}, transparent)`;
+  const gradientOffer = `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary[800] || theme.palette.primary.main})`;
   return (
     <Box>
       {/* HERO */}
