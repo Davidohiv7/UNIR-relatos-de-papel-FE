@@ -6,15 +6,11 @@ import { LoginEmailForm } from './LoginEmailForm'; // IMPORTANTE: Importar el nu
 import { KeyboardBackspace } from '@mui/icons-material';
 import { Link } from 'react-router';
 import { ROUTES } from '../../config/navigation/navigation.config';
+import { useAuth } from '../../hooks';
 
-interface LoginFormProps {
-  onLogin: (email: string, pass: string) => void;
-}
-
-export const LoginForm = ({ onLogin }: LoginFormProps) => {
-  // hook de estado para controlar la vista del formulario de corre
-
+export const LoginForm = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const { login } = useAuth();
 
   return (
     <>
@@ -69,7 +65,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                   variant="outlined"
                   fullWidth
                   startIcon={<GoogleIcon sx={{ color: '#db4437' }} />}
-                  onClick={() => onLogin('ana@relatos.com', 'password123')}
+                  onClick={() => login({ email: 'ana@relatos.com', password: 'password123' })}
                   sx={{
                     py: 1.5,
                     px: 3,
@@ -103,7 +99,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </>
           ) : (
             /*  Vista hacia el formulario de correo */
-            <LoginEmailForm onLogin={onLogin} onBack={() => setShowEmailForm(false)} />
+            <LoginEmailForm onBack={() => setShowEmailForm(false)} />
           )}
         </CardContent>
       </Card>
