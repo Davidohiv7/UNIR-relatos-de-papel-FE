@@ -9,8 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import z from 'zod';
 
 const addressSchema = z.object({
-  email: z.email('Agrega un email valido').trim(),
-  password: z.string().trim().min(1, 'Agrega la contraseña'),
+  email: z.email('Ingresa un email válido').trim(),
+  password: z.string().trim().min(1, 'Ingresa tu contraseña'),
 });
 interface LoginEmailFormProps {
   onBack: () => void;
@@ -71,7 +71,6 @@ export const LoginEmailForm = ({ onBack }: LoginEmailFormProps) => {
       </Typography>
 
       {/*Input para la contraseña, controlado por el estado 'password' y con funcionalidad de mostrar/ocultar contraseña*/}
-
       <TextField
         {...register('password')}
         variant="outlined"
