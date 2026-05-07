@@ -48,7 +48,7 @@ function CatalogPage() {
     );
   }
 
-  // ✨ Agrupamos los valores de los filtros para usarlos tanto en inicialización como en la key
+  // Agrupamos los valores de los filtros para usarlos tanto en inicialización como en la key
   const currentFilterValues = {
     search: params.search,
     categoryId: params.categoryId,
@@ -72,8 +72,6 @@ function CatalogPage() {
           >
             <Box sx={{ alignSelf: 'start' }}>
               <CatalogFilters
-                // ✨ LA MAGIA: Cuando el estado externo de los filtros cambia (ej. limpiar filtros),
-                // el string cambia, React destruye el componente viejo y crea uno nuevo.
                 key={JSON.stringify(currentFilterValues)}
                 initialValues={currentFilterValues}
                 categories={metadata.categories}

@@ -2,7 +2,7 @@ import { Box, Button, Typography, Card, CardContent } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import Mail from '@mui/icons-material/Mail';
 import { useState } from 'react';
-import { LoginEmailForm } from './LoginEmailForm'; // IMPORTANTE: Importar el nuevo
+import { LoginEmailForm } from './LoginEmailForm';
 import { KeyboardBackspace } from '@mui/icons-material';
 import { Link } from 'react-router';
 import { ROUTES } from '../../config/navigation/navigation.config';
@@ -25,8 +25,7 @@ export const LoginForm = () => {
           {/* Lógica condicional */}
           {!showEmailForm ? (
             <>
-              {' '}
-              {/*Fragment*/}
+              {/*Fragment*/}{' '}
               <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
                 Iniciar sesión
               </Typography>
