@@ -7,7 +7,7 @@ import { LoginForm } from '../../components/login/LoginForm';
 import BrandIcon from '../../components/ui/BrandIcon';
 
 function LoginPage() {
-  const { login, customer, isInitializing } = useAuth();
+  const { customer, isInitializing } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +43,7 @@ function LoginPage() {
         </Typography>
       </Stack>
 
-      <LoginForm onLogin={login} />
+      <LoginForm />
     </Box>
   );
 }

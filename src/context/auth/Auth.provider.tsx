@@ -14,11 +14,9 @@ function AuthProvider({ children }: Props) {
   const [isInitializing] = useState(false);
   const navigate = useNavigate();
 
-  const login: AuthContextValue['login'] = async (email, password) => {
-    const parsedEmail = email.trim().toLowerCase();
-    const parsedPassword = password.trim();
+  const login: AuthContextValue['login'] = async ({ email, password }) => {
     const foundCustomer = mockUsers.find(
-      candidate => candidate.email === parsedEmail && candidate.password === parsedPassword
+      candidate => candidate.email === email && candidate.password === password
     );
 
     if (!foundCustomer) {
